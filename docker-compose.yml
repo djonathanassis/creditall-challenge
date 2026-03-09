@@ -1,28 +1,11 @@
-# ==============================================
-# Creditall Challenge - Docker Orchestrator
-# ==============================================
-# This is an OPTIONAL orchestrator file that allows you to:
-#   - Start all services at once: docker-compose up -d
-#   - View all logs: docker-compose logs -f
-#   - Stop everything: docker-compose down
-#
-# You can also run services independently:
-#   - Backend only: cd backend && docker-compose up -d
-#   - Frontend only: cd frontend && docker-compose up -d
-# ==============================================
-
 include:
-  # Backend services (app, web, queue, mysql, redis)
   - path: ./backend/docker-compose.yml
     env_file:
       - ./backend/.env.docker
       - ./backend/.env.local
   
-  # Frontend service (vite dev server)
   - path: ./frontend/docker-compose.yml
 
-# Shared network configuration
-# This network is created once and used by all services
 networks:
   creditall_dev_network:
     name: creditall_dev_network
@@ -32,6 +15,3 @@ networks:
       config:
         - subnet: 172.20.0.0/16
           gateway: 172.20.0.1
-
-# NOTE: Volumes are defined in individual compose files
-# to maintain service independence
