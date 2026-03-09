@@ -20,24 +20,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Health check endpoint (public)
 Route::get('health', [HealthController::class, 'check']);
 
-// Authentication routes (public)
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 });
 
-// Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('customers', CustomerController::class);
+    Route::apiResource('sales', SaleController::class);
     Route::get('sales/{sale}/items', [SaleController::class, 'items']);
     Route::get('customers/{customer}/sales', [CustomerController::class, 'sales']);
 });
 
-Route::apiResource('/teste', SaleController::class);
-
-Route::apiResource('sales', SaleController::class);
