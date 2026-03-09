@@ -1,0 +1,57 @@
+services:
+  # React + Vite Development Container
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    container_name: creditall_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - .:/app
+      - frontend_node_modules:/app/node_modules 
+      - frontend_vite_cache:/app/.vite 
+      - frontend_npm_cache:/home/nodejs/.npm 
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8080/api}
+      - VITE_APP_NAME=${VITE_APP_NAME:-Sistema de Gestão de Vendas}
+      - VITE_APP_ENV=development
+      - VITE_API_TIMEOUT=10000
+    networks:
+      - default
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  default:
+    name: creditall_dev_network
+    external: true
+    
+volumes:
+  frontend_node_modules:
+    name: creditall_frontend_node_modules
+    driver: local
+  frontend_vite_cache:
+    name: creditall_frontend_vite_cache
+    driver: local
+  frontend_npm_cache:
+    name: creditall_frontend_npm_cache
+    driver: local

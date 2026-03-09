@@ -1,0 +1,59 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "build:clean": "rm -rf dist && npm run build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,css,md,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,md,json}\"",
+    "quality": "npm run format && npm run lint && npm run build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "docker:dev": "docker-compose up --build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:stop": "docker-compose stop",
+    "docker:restart": "docker-compose restart frontend",
+    "docker:logs": "docker-compose logs -f frontend",
+    "docker:shell": "docker-compose exec frontend sh",
+    "docker:build": "docker-compose build --no-cache",
+    "docker:clean": "docker-compose down -v && docker system prune -f",
+    "docker:status": "docker-compose ps"
+  },
+  "dependencies": {
+    "axios": "^1.13.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^6.30.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.27",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "laravel-vite-plugin": "^2.1.0",
+    "postcss": "^8.5.8",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.48.0",
+    "vite": "^8.0.0-beta.13",
+    "vite-plugin-compression2": "^2.5.0"
+  },
+  "overrides": {
+    "vite": "^8.0.0-beta.13"
+  }
+}
