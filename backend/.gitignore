@@ -28,3 +28,4 @@ AGENTS.md
 run_migrations.sql
 README-Docker.md
 ./opencode.json
+./.idea
