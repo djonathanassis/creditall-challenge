@@ -1,0 +1,32 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app/
+        - config/
+        - database/
+    
+    # Exclusões específicas
+    excludePaths:
+        - bootstrap/cache/
+        - storage/
+        - vendor/
+        - node_modules/
+        - database/migrations/
+        - database/seeders/DatabaseSeeder.php
+    
+    # Configurações básicas
+    reportUnmatchedIgnoredErrors: false
+    
+    # Ignores para DTOs e outras classes específicas
+    ignoreErrors:
+        # DTOs podem ter propriedades não inicializadas (preenchidas via construtor)
+        - '#Property App\\DataTransferObjects\\.*::\$\w+ is never written, only read#'
+        # Models podem ter métodos dinâmicos do Eloquent
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::\w+\(\)#'
+        # Form Requests podem ter métodos de validação customizados
+        - '#Method App\\Http\\Requests\\.*::\w+\(\) has no return type specified#'
+        # Resources podem ter transformações dinâmicas
+        - '#Property App\\Http\\Resources\\.*::\$\w+ is never written, only read#'

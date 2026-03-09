@@ -1,0 +1,94 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "declare_strict_types": true,
+        "strict_param": true,
+        "strict_comparison": true,
+        "ordered_imports": {
+            "sort_algorithm": "alpha",
+            "imports_order": [
+                "class",
+                "function",
+                "const"
+            ]
+        },
+        "no_unused_imports": true,
+        "single_import_per_statement": true,
+        "group_import": false,
+        "global_namespace_import": {
+            "import_classes": false,
+            "import_constants": false,
+            "import_functions": false
+        },
+        "fully_qualified_strict_types": true,
+        "no_leading_import_slash": true,
+        "single_line_after_imports": true,
+        "blank_line_after_namespace": true,
+        "class_attributes_separation": {
+            "elements": {
+                "method": "one",
+                "property": "one",
+                "const": "one"
+            }
+        },
+        "method_chaining_indentation": true,
+        "multiline_whitespace_before_semicolons": {
+            "strategy": "no_multi_line"
+        },
+        "no_extra_blank_lines": {
+            "tokens": [
+                "extra",
+                "throw",
+                "use"
+            ]
+        },
+        "no_trailing_whitespace": true,
+        "no_whitespace_in_blank_line": true,
+        "array_syntax": {
+            "syntax": "short"
+        },
+        "concat_space": {
+            "spacing": "one"
+        },
+        "binary_operator_spaces": {
+            "default": "single_space"
+        },
+        "ternary_operator_spaces": true,
+        "unary_operator_spaces": false,
+        "cast_spaces": true,
+        "standardize_not_equals": true,
+        "yoda_style": {
+            "equal": false,
+            "identical": false,
+            "less_and_greater": false
+        },
+        "single_quote": true,
+        "standardize_increment": true,
+        "object_operator_without_whitespace": true,
+        "new_with_braces": true,
+        "function_declaration": {
+            "closure_function_spacing": "one"
+        },
+        "return_type_declaration": {
+            "space_before": "none"
+        },
+        "visibility_required": {
+            "elements": [
+                "method",
+                "property"
+            ]
+        },
+        "lowercase_keywords": true,
+        "constant_case": true,
+        "native_function_casing": true,
+        "php_unit_method_casing": {
+            "case": "camel_case"
+        }
+    },
+    "exclude": [
+        "bootstrap/cache",
+        "storage",
+        "vendor",
+        "node_modules"
+    ]
+}

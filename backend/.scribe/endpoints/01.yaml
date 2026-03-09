@@ -1,0 +1,237 @@
+name: '🔐 Autenticação'
+description: |-
+
+  Endpoints para gerenciar autenticação de usuários na API.
+  Utiliza Laravel Sanctum para autenticação baseada em tokens Bearer.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/auth/login
+    metadata:
+      custom: []
+      groupName: '🔐 Autenticação'
+      groupDescription: |-
+
+        Endpoints para gerenciar autenticação de usuários na API.
+        Utiliza Laravel Sanctum para autenticação baseada em tokens Bearer.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Login de usuário'
+      description: 'Autentica um usuário com email e senha, retornando as informações do usuário e um token de acesso.'
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      email:
+        custom: []
+        name: email
+        description: 'O email do usuário. Deve ser um email válido.'
+        required: true
+        example: usuario@exemplo.com
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: 'A senha do usuário. Mínimo 8 caracteres.'
+        required: true
+        example: minhasenha123
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      email: usuario@exemplo.com
+      password: minhasenha123
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Login realizado com sucesso",
+            "data": {
+              "user": {
+                "id": 1,
+                "name": "João Silva",
+                "email": "joao@exemplo.com",
+                "email_verified_at": "2026-03-06T10:30:00.000000Z",
+                "created_at": "2026-03-06T10:30:00.000000Z",
+                "updated_at": "2026-03-06T10:30:00.000000Z"
+              },
+              "token": "1|AbCdEfGhIjKlMnOpQrStUvWxYz1234567890abcdef"
+            }
+          }
+        headers: []
+        description: 'Login bem-sucedido'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Erro na validação dos dados",
+            "errors": {
+              "email": ["As credenciais fornecidas são inválidas."]
+            }
+          }
+        headers: []
+        description: 'Credenciais inválidas'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Erro na validação dos dados",
+            "errors": {
+              "email": ["O campo email é obrigatório."],
+              "password": ["O campo senha é obrigatório."]
+            }
+          }
+        headers: []
+        description: 'Dados de validação inválidos'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/auth/logout
+    metadata:
+      custom: []
+      groupName: '🔐 Autenticação'
+      groupDescription: |-
+
+        Endpoints para gerenciar autenticação de usuários na API.
+        Utiliza Laravel Sanctum para autenticação baseada em tokens Bearer.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Logout de usuário'
+      description: 'Revoga o token de acesso atual do usuário autenticado, efetuando logout da sessão.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Logout realizado com sucesso",
+            "data": null
+          }
+        headers: []
+        description: 'Logout bem-sucedido'
+      -
+        custom: []
+        status: 401
+        content: |-
+          {
+            "success": false,
+            "message": "Token de acesso inválido ou expirado"
+          }
+        headers: []
+        description: 'Token inválido ou expirado'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/auth/me
+    metadata:
+      custom: []
+      groupName: '🔐 Autenticação'
+      groupDescription: |-
+
+        Endpoints para gerenciar autenticação de usuários na API.
+        Utiliza Laravel Sanctum para autenticação baseada em tokens Bearer.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Informações do usuário autenticado'
+      description: 'Retorna as informações completas do usuário atualmente autenticado.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Dados recuperados com sucesso",
+            "data": {
+              "id": 1,
+              "name": "João Silva",
+              "email": "joao@exemplo.com",
+              "email_verified_at": "2026-03-06T10:30:00.000000Z",
+              "created_at": "2026-03-06T10:30:00.000000Z",
+              "updated_at": "2026-03-06T10:30:00.000000Z"
+            }
+          }
+        headers: []
+        description: 'Usuário autenticado'
+      -
+        custom: []
+        status: 401
+        content: |-
+          {
+            "success": false,
+            "message": "Token de acesso inválido ou expirado"
+          }
+        headers: []
+        description: 'Token inválido ou expirado'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

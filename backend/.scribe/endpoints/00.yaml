@@ -1,0 +1,59 @@
+name: '🛠️ Utilitários'
+description: |-
+
+  Endpoints utilitários para monitoramento e verificação do sistema.
+  Inclui health check e informações de status da aplicação.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/health
+    metadata:
+      custom: []
+      groupName: '🛠️ Utilitários'
+      groupDescription: |-
+
+        Endpoints utilitários para monitoramento e verificação do sistema.
+        Inclui health check e informações de status da aplicação.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Health Check'
+      description: |-
+        Endpoint público para verificação de saúde da API.
+        Retorna informações sobre o status da aplicação, timestamp e versão.
+
+        Este endpoint é usado para:
+        - Monitoramento de uptime
+        - Load balancer health checks
+        - Verificação de conectividade
+        - Deploy validation
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "status": "healthy",
+            "timestamp": "2026-03-06T13:45:00.012870Z",
+            "version": "1.0.0"
+          }
+        headers: []
+        description: 'API funcionando corretamente'
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null

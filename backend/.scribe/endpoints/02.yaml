@@ -1,0 +1,625 @@
+name: '📦 Produtos'
+description: |-
+
+  Endpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.
+  Todos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/products
+    metadata:
+      custom: []
+      groupName: '📦 Produtos'
+      groupDescription: |-
+
+        Endpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.
+        Todos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar produtos'
+      description: |-
+        Retorna uma lista paginada de produtos com opções de filtro e busca.
+        Suporta filtros por nome, categoria e faixa de preço.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      search:
+        custom: []
+        name: search
+        description: 'Filtro de busca por nome do produto.'
+        required: false
+        example: notebook
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      min_price:
+        custom: []
+        name: min_price
+        description: 'Preço mínimo para filtrar produtos.'
+        required: false
+        example: 100.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      max_price:
+        custom: []
+        name: max_price
+        description: 'Preço máximo para filtrar produtos.'
+        required: false
+        example: 1000.0
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Número de itens por página (padrão: 15, máximo: 100).'
+        required: false
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      page:
+        custom: []
+        name: page
+        description: 'Página a ser exibida (padrão: 1).'
+        required: false
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      search: notebook
+      min_price: 100.0
+      max_price: 1000.0
+      per_page: 20
+      page: 1
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Dados recuperados com sucesso",
+            "data": [
+              {
+                "id": 1,
+                "name": "Notebook Dell Inspiron",
+                "description": "Notebook Dell com processador i7 e 16GB RAM",
+                "price": "2499.99",
+                "stock_quantity": 15,
+                "image_url": "http://localhost:8080/storage/products/notebook_dell.jpg",
+                "created_at": "2026-03-06T10:30:00.000000Z",
+                "updated_at": "2026-03-06T10:30:00.000000Z"
+              },
+              {
+                "id": 2,
+                "name": "Mouse Logitech MX",
+                "description": "Mouse sem fio com precisão óptica",
+                "price": "199.90",
+                "stock_quantity": 50,
+                "image_url": "http://localhost:8080/storage/products/mouse_logitech.jpg",
+                "created_at": "2026-03-06T11:00:00.000000Z",
+                "updated_at": "2026-03-06T11:00:00.000000Z"
+              }
+            ],
+            "meta": {
+              "current_page": 1,
+              "per_page": 15,
+              "total": 50,
+              "last_page": 4,
+              "from": 1,
+              "to": 15
+            }
+          }
+        headers: []
+        description: 'Lista de produtos'
+      -
+        custom: []
+        status: 401
+        content: |-
+          {
+            "success": false,
+            "message": "Token de acesso inválido ou expirado"
+          }
+        headers: []
+        description: 'Token inválido'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/products
+    metadata:
+      custom: []
+      groupName: '📦 Produtos'
+      groupDescription: |-
+
+        Endpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.
+        Todos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Criar produto'
+      description: |-
+        Cria um novo produto no sistema com validação completa de dados.
+        Suporta upload de imagem opcional.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Nome do produto. Deve ser único.'
+        required: true
+        example: 'Notebook Dell Inspiron'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Descrição detalhada do produto.'
+        required: true
+        example: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      price:
+        custom: []
+        name: price
+        description: 'Preço do produto (máximo 2 decimais). Deve ser maior que 0.'
+        required: true
+        example: 2499.99
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      stock_quantity:
+        custom: []
+        name: stock_quantity
+        description: 'Quantidade em estoque. Deve ser >= 0.'
+        required: true
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'Imagem do produto. Formatos aceitos: jpg, jpeg, png, gif. Tamanho máximo: 2MB.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: 'Notebook Dell Inspiron'
+      description: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+      price: 2499.99
+      stock_quantity: 15
+    fileParameters:
+      image: null
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "success": true,
+            "message": "Produto criado com sucesso",
+            "data": {
+              "id": 1,
+              "name": "Notebook Dell Inspiron",
+              "description": "Notebook Dell com processador i7, 16GB RAM e SSD 512GB",
+              "price": "2499.99",
+              "stock_quantity": 15,
+              "image_url": "http://localhost:8080/storage/products/notebook_dell.jpg",
+              "created_at": "2026-03-06T10:30:00.000000Z",
+              "updated_at": "2026-03-06T10:30:00.000000Z"
+            }
+          }
+        headers: []
+        description: 'Produto criado com sucesso'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Erro na validação dos dados",
+            "errors": {
+              "name": ["O campo nome é obrigatório."],
+              "price": ["O campo preço deve ser maior que 0."],
+              "stock_quantity": ["O campo quantidade deve ser um número inteiro."]
+            }
+          }
+        headers: []
+        description: 'Erro de validação'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Erro na validação dos dados",
+            "errors": {
+              "name": ["O produto com este nome já existe."]
+            }
+          }
+        headers: []
+        description: 'Produto já existe'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/products/{id}'
+    metadata:
+      custom: []
+      groupName: '📦 Produtos'
+      groupDescription: |-
+
+        Endpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.
+        Todos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Exibir produto'
+      description: 'Retorna os detalhes completos de um produto específico.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID do produto.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Dados recuperados com sucesso",
+            "data": {
+              "id": 1,
+              "name": "Notebook Dell Inspiron",
+              "description": "Notebook Dell com processador i7, 16GB RAM e SSD 512GB",
+              "price": "2499.99",
+              "stock_quantity": 15,
+              "image_url": "http://localhost:8080/storage/products/notebook_dell.jpg",
+              "created_at": "2026-03-06T10:30:00.000000Z",
+              "updated_at": "2026-03-06T10:30:00.000000Z"
+            }
+          }
+        headers: []
+        description: 'Produto encontrado'
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Produto não encontrado"
+          }
+        headers: []
+        description: 'Produto não encontrado'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/products/{id}'
+    metadata:
+      custom: []
+      groupName: '📦 Produtos'
+      groupDescription: |-
+
+        Endpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.
+        Todos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Atualizar produto'
+      description: |-
+        Atualiza os dados de um produto existente.
+        Permite atualização parcial dos campos e substituição da imagem.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID do produto.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Nome do produto. Deve ser único (exceto para o próprio produto).'
+        required: false
+        example: 'Notebook Dell Inspiron 15'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Descrição atualizada do produto.'
+        required: false
+        example: 'Notebook Dell com processador i7 atualizado'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      price:
+        custom: []
+        name: price
+        description: 'Novo preço do produto (máximo 2 decimais). Deve ser maior que 0.'
+        required: false
+        example: 2699.99
+        type: number
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      stock_quantity:
+        custom: []
+        name: stock_quantity
+        description: 'Nova quantidade em estoque. Deve ser >= 0.'
+        required: false
+        example: 20
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'Nova imagem do produto (substitui a anterior). Formatos aceitos: jpg, jpeg, png, gif. Tamanho máximo: 2MB.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: 'Notebook Dell Inspiron 15'
+      description: 'Notebook Dell com processador i7 atualizado'
+      price: 2699.99
+      stock_quantity: 20
+    fileParameters:
+      image: null
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Produto atualizado com sucesso",
+            "data": {
+              "id": 1,
+              "name": "Notebook Dell Inspiron 15",
+              "description": "Notebook Dell com processador i7 atualizado",
+              "price": "2699.99",
+              "stock_quantity": 20,
+              "image_url": "http://localhost:8080/storage/products/notebook_dell_updated.jpg",
+              "created_at": "2026-03-06T10:30:00.000000Z",
+              "updated_at": "2026-03-06T12:30:00.000000Z"
+            }
+          }
+        headers: []
+        description: 'Produto atualizado'
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Produto não encontrado"
+          }
+        headers: []
+        description: 'Produto não encontrado'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "message": "Erro na validação dos dados",
+            "errors": {
+              "name": ["O produto com este nome já existe."],
+              "price": ["O campo preço deve ser maior que 0."]
+            }
+          }
+        headers: []
+        description: 'Erro de validação'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/products/{id}'
+    metadata:
+      custom: []
+      groupName: '📦 Produtos'
+      groupDescription: |-
+
+        Endpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.
+        Todos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Excluir produto'
+      description: |-
+        Remove um produto do sistema.
+        Não é possível excluir produtos que possuem vendas associadas (regra de negócio).
+        A imagem do produto também será removida do armazenamento.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID do produto.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Produto excluído com sucesso",
+            "data": null
+          }
+        headers: []
+        description: 'Produto excluído'
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "message": "Produto não encontrado"
+          }
+        headers: []
+        description: 'Produto não encontrado'
+      -
+        custom: []
+        status: 409
+        content: |-
+          {
+            "success": false,
+            "message": "Não é possível excluir o produto pois ele possui vendas associadas"
+          }
+        headers: []
+        description: 'Produto possui vendas'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null

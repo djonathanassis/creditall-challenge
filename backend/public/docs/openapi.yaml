@@ -1,0 +1,3066 @@
+openapi: 3.0.3
+info:
+  title: 'CreditAll Challenge API Documentation'
+  description: 'API REST para gerenciamento de vendas, produtos e clientes do sistema CreditAll Challenge. Oferece funcionalidades completas de CRUD, controle de estoque, cálculo de descontos e gerenciamento de status de vendas.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+tags:
+  -
+    name: '🔐 Autenticação'
+    description: "\nEndpoints para gerenciar autenticação de usuários na API.\nUtiliza Laravel Sanctum para autenticação baseada em tokens Bearer."
+  -
+    name: '📦 Produtos'
+    description: "\nEndpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.\nTodos os endpoints são protegidos por autenticação e possuem validação rigorosa de dados."
+  -
+    name: '👥 Clientes'
+    description: "\nEndpoints para gerenciamento completo de clientes, incluindo CRUD, validação de CPF e estatísticas de vendas.\nTodos os endpoints são protegidos por autenticação."
+  -
+    name: '💰 Vendas'
+    description: "\nEndpoints para gerenciamento completo de vendas com lógica de negócio complexa.\nInclui criação de vendas com múltiplos itens, controle de estoque, descontos e gestão de status.\n\n## Status de Vendas\n\nAs vendas seguem um fluxo de status bem definido:\n\n- **PENDING**: Venda criada, aguardando processamento\n- **COMPLETED**: Venda finalizada, estoque deduzido\n- **CANCELLED**: Venda cancelada, estoque restaurado\n\n## Transições de Status Permitidas\n\n- PENDING → COMPLETED: Confirma a venda e deduz estoque\n- PENDING → CANCELLED: Cancela a venda\n- COMPLETED → CANCELLED: Cancela venda finalizada (restaura estoque)\n\n## Lógica de Estoque\n\n- **Criação**: Reserva estoque (não deduz)\n- **COMPLETED**: Deduz estoque definitivamente\n- **CANCELLED**: Restaura estoque reservado/deduzido\n\n## Sistema de Descontos\n\n- Desconto percentual aplicado sobre o subtotal\n- Cálculo: subtotal - (subtotal * desconto / 100)\n- Validação automática de produtos e quantidades"
+  -
+    name: '🛠️ Utilitários'
+    description: "\nEndpoints utilitários para monitoramento e verificação do sistema.\nInclui health check e informações de status da aplicação."
+components:
+  securitySchemes:
+    default:
+      type: http
+      scheme: bearer
+      description: "## Autenticação\n\nEsta API usa **Laravel Sanctum** para autenticação baseada em tokens Bearer.\n\n### Como Obter um Token\n1. Faça login através do endpoint `POST /api/auth/login` com suas credenciais\n2. O token será retornado na resposta do login\n3. Use este token nas requisições subsequentes\n\n### Como Usar o Token\nInclua o token no header `Authorization` de todas as requisições protegidas:\n```\nAuthorization: Bearer {seu_token_aqui}\n```\n\n### Segurança\n- Os tokens não expiram automaticamente, mas podem ser revogados\n- Use `POST /api/auth/logout` para revogar o token atual\n- Mantenha seu token seguro e não o compartilhe\n- Em caso de comprometimento, faça logout e gere um novo token\n\n### Rate Limiting\n- **Login**: Limitado a 5 tentativas por minuto\n- **API Geral**: Limitado a 60 requisições por minuto por IP\n- **Usuário Autenticado**: Limitado a 1000 requisições por hora por usuário"
+security:
+  -
+    default: []
+paths:
+  /api/auth/login:
+    post:
+      summary: 'Login de usuário'
+      operationId: loginDeUsurio
+      description: 'Autentica um usuário com email e senha, retornando as informações do usuário e um token de acesso.'
+      parameters: []
+      responses:
+        200:
+          description: 'Login bem-sucedido'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Login realizado com sucesso'
+                  data:
+                    user:
+                      id: 1
+                      name: 'João Silva'
+                      email: joao@exemplo.com
+                      email_verified_at: '2026-03-06T10:30:00.000000Z'
+                      created_at: '2026-03-06T10:30:00.000000Z'
+                      updated_at: '2026-03-06T10:30:00.000000Z'
+                    token: 1|AbCdEfGhIjKlMnOpQrStUvWxYz1234567890abcdef
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Login realizado com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 'João Silva'
+                          email:
+                            type: string
+                            example: joao@exemplo.com
+                          email_verified_at:
+                            type: string
+                            example: '2026-03-06T10:30:00.000000Z'
+                          created_at:
+                            type: string
+                            example: '2026-03-06T10:30:00.000000Z'
+                          updated_at:
+                            type: string
+                            example: '2026-03-06T10:30:00.000000Z'
+                      token:
+                        type: string
+                        example: 1|AbCdEfGhIjKlMnOpQrStUvWxYz1234567890abcdef
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 'Credenciais inválidas'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        email:
+                          - 'As credenciais fornecidas são inválidas.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          email:
+                            type: array
+                            example:
+                              - 'As credenciais fornecidas são inválidas.'
+                            items:
+                              type: string
+                  -
+                    description: 'Dados de validação inválidos'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        email:
+                          - 'O campo email é obrigatório.'
+                        password:
+                          - 'O campo senha é obrigatório.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          email:
+                            type: array
+                            example:
+                              - 'O campo email é obrigatório.'
+                            items:
+                              type: string
+                          password:
+                            type: array
+                            example:
+                              - 'O campo senha é obrigatório.'
+                            items:
+                              type: string
+      tags:
+        - '🔐 Autenticação'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'O email do usuário. Deve ser um email válido.'
+                  example: usuario@exemplo.com
+                password:
+                  type: string
+                  description: 'A senha do usuário. Mínimo 8 caracteres.'
+                  example: minhasenha123
+              required:
+                - email
+                - password
+      security: []
+  /api/auth/logout:
+    post:
+      summary: 'Logout de usuário'
+      operationId: logoutDeUsurio
+      description: 'Revoga o token de acesso atual do usuário autenticado, efetuando logout da sessão.'
+      parameters: []
+      responses:
+        200:
+          description: 'Logout bem-sucedido'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Logout realizado com sucesso'
+                  data: null
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Logout realizado com sucesso'
+                  data:
+                    type: string
+                    example: null
+                    nullable: true
+        401:
+          description: 'Token inválido ou expirado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de acesso inválido ou expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de acesso inválido ou expirado'
+      tags:
+        - '🔐 Autenticação'
+  /api/auth/me:
+    get:
+      summary: 'Informações do usuário autenticado'
+      operationId: informaesDoUsurioAutenticado
+      description: 'Retorna as informações completas do usuário atualmente autenticado.'
+      parameters: []
+      responses:
+        200:
+          description: 'Usuário autenticado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    id: 1
+                    name: 'João Silva'
+                    email: joao@exemplo.com
+                    email_verified_at: '2026-03-06T10:30:00.000000Z'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T10:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'João Silva'
+                      email:
+                        type: string
+                        example: joao@exemplo.com
+                      email_verified_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+        401:
+          description: 'Token inválido ou expirado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de acesso inválido ou expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de acesso inválido ou expirado'
+      tags:
+        - '🔐 Autenticação'
+  /api/products:
+    get:
+      summary: 'Listar produtos'
+      operationId: listarProdutos
+      description: "Retorna uma lista paginada de produtos com opções de filtro e busca.\nSuporta filtros por nome, categoria e faixa de preço."
+      parameters:
+        -
+          in: query
+          name: search
+          description: 'Filtro de busca por nome do produto.'
+          example: notebook
+          required: false
+          schema:
+            type: string
+            description: 'Filtro de busca por nome do produto.'
+            example: notebook
+        -
+          in: query
+          name: min_price
+          description: 'Preço mínimo para filtrar produtos.'
+          example: 100.0
+          required: false
+          schema:
+            type: number
+            description: 'Preço mínimo para filtrar produtos.'
+            example: 100.0
+        -
+          in: query
+          name: max_price
+          description: 'Preço máximo para filtrar produtos.'
+          example: 1000.0
+          required: false
+          schema:
+            type: number
+            description: 'Preço máximo para filtrar produtos.'
+            example: 1000.0
+        -
+          in: query
+          name: per_page
+          description: 'Número de itens por página (padrão: 15, máximo: 100).'
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 'Número de itens por página (padrão: 15, máximo: 100).'
+            example: 20
+        -
+          in: query
+          name: page
+          description: 'Página a ser exibida (padrão: 1).'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'Página a ser exibida (padrão: 1).'
+            example: 1
+      responses:
+        200:
+          description: 'Lista de produtos'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    -
+                      id: 1
+                      name: 'Notebook Dell Inspiron'
+                      description: 'Notebook Dell com processador i7 e 16GB RAM'
+                      price: '2499.99'
+                      stock_quantity: 15
+                      image_url: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                      created_at: '2026-03-06T10:30:00.000000Z'
+                      updated_at: '2026-03-06T10:30:00.000000Z'
+                    -
+                      id: 2
+                      name: 'Mouse Logitech MX'
+                      description: 'Mouse sem fio com precisão óptica'
+                      price: '199.90'
+                      stock_quantity: 50
+                      image_url: 'http://localhost:8080/storage/products/mouse_logitech.jpg'
+                      created_at: '2026-03-06T11:00:00.000000Z'
+                      updated_at: '2026-03-06T11:00:00.000000Z'
+                  meta:
+                    current_page: 1
+                    per_page: 15
+                    total: 50
+                    last_page: 4
+                    from: 1
+                    to: 15
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 'Notebook Dell Inspiron'
+                        description: 'Notebook Dell com processador i7 e 16GB RAM'
+                        price: '2499.99'
+                        stock_quantity: 15
+                        image_url: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                        created_at: '2026-03-06T10:30:00.000000Z'
+                        updated_at: '2026-03-06T10:30:00.000000Z'
+                      -
+                        id: 2
+                        name: 'Mouse Logitech MX'
+                        description: 'Mouse sem fio com precisão óptica'
+                        price: '199.90'
+                        stock_quantity: 50
+                        image_url: 'http://localhost:8080/storage/products/mouse_logitech.jpg'
+                        created_at: '2026-03-06T11:00:00.000000Z'
+                        updated_at: '2026-03-06T11:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 'Notebook Dell Inspiron'
+                        description:
+                          type: string
+                          example: 'Notebook Dell com processador i7 e 16GB RAM'
+                        price:
+                          type: string
+                          example: '2499.99'
+                        stock_quantity:
+                          type: integer
+                          example: 15
+                        image_url:
+                          type: string
+                          example: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                        created_at:
+                          type: string
+                          example: '2026-03-06T10:30:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2026-03-06T10:30:00.000000Z'
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 15
+                      total:
+                        type: integer
+                        example: 50
+                      last_page:
+                        type: integer
+                        example: 4
+                      from:
+                        type: integer
+                        example: 1
+                      to:
+                        type: integer
+                        example: 15
+        401:
+          description: 'Token inválido'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Token de acesso inválido ou expirado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Token de acesso inválido ou expirado'
+      tags:
+        - '📦 Produtos'
+    post:
+      summary: 'Criar produto'
+      operationId: criarProduto
+      description: "Cria um novo produto no sistema com validação completa de dados.\nSuporta upload de imagem opcional."
+      parameters: []
+      responses:
+        201:
+          description: 'Produto criado com sucesso'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Produto criado com sucesso'
+                  data:
+                    id: 1
+                    name: 'Notebook Dell Inspiron'
+                    description: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+                    price: '2499.99'
+                    stock_quantity: 15
+                    image_url: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T10:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Produto criado com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Notebook Dell Inspiron'
+                      description:
+                        type: string
+                        example: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+                      price:
+                        type: string
+                        example: '2499.99'
+                      stock_quantity:
+                        type: integer
+                        example: 15
+                      image_url:
+                        type: string
+                        example: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 'Erro de validação'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        name:
+                          - 'O campo nome é obrigatório.'
+                        price:
+                          - 'O campo preço deve ser maior que 0.'
+                        stock_quantity:
+                          - 'O campo quantidade deve ser um número inteiro.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          name:
+                            type: array
+                            example:
+                              - 'O campo nome é obrigatório.'
+                            items:
+                              type: string
+                          price:
+                            type: array
+                            example:
+                              - 'O campo preço deve ser maior que 0.'
+                            items:
+                              type: string
+                          stock_quantity:
+                            type: array
+                            example:
+                              - 'O campo quantidade deve ser um número inteiro.'
+                            items:
+                              type: string
+                  -
+                    description: 'Produto já existe'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        name:
+                          - 'O produto com este nome já existe.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          name:
+                            type: array
+                            example:
+                              - 'O produto com este nome já existe.'
+                            items:
+                              type: string
+      tags:
+        - '📦 Produtos'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Nome do produto. Deve ser único.'
+                  example: 'Notebook Dell Inspiron'
+                description:
+                  type: string
+                  description: 'Descrição detalhada do produto.'
+                  example: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+                  nullable: true
+                price:
+                  type: number
+                  description: 'Preço do produto (máximo 2 decimais). Deve ser maior que 0.'
+                  example: 2499.99
+                stock_quantity:
+                  type: integer
+                  description: 'Quantidade em estoque. Deve ser >= 0.'
+                  example: 15
+                image:
+                  type: string
+                  format: binary
+                  description: 'Imagem do produto. Formatos aceitos: jpg, jpeg, png, gif. Tamanho máximo: 2MB.'
+                  nullable: true
+              required:
+                - name
+                - description
+                - price
+                - stock_quantity
+  '/api/products/{id}':
+    get:
+      summary: 'Exibir produto'
+      operationId: exibirProduto
+      description: 'Retorna os detalhes completos de um produto específico.'
+      parameters: []
+      responses:
+        200:
+          description: 'Produto encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    id: 1
+                    name: 'Notebook Dell Inspiron'
+                    description: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+                    price: '2499.99'
+                    stock_quantity: 15
+                    image_url: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T10:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Notebook Dell Inspiron'
+                      description:
+                        type: string
+                        example: 'Notebook Dell com processador i7, 16GB RAM e SSD 512GB'
+                      price:
+                        type: string
+                        example: '2499.99'
+                      stock_quantity:
+                        type: integer
+                        example: 15
+                      image_url:
+                        type: string
+                        example: 'http://localhost:8080/storage/products/notebook_dell.jpg'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+        404:
+          description: 'Produto não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Produto não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Produto não encontrado'
+      tags:
+        - '📦 Produtos'
+    put:
+      summary: 'Atualizar produto'
+      operationId: atualizarProduto
+      description: "Atualiza os dados de um produto existente.\nPermite atualização parcial dos campos e substituição da imagem."
+      parameters: []
+      responses:
+        200:
+          description: 'Produto atualizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Produto atualizado com sucesso'
+                  data:
+                    id: 1
+                    name: 'Notebook Dell Inspiron 15'
+                    description: 'Notebook Dell com processador i7 atualizado'
+                    price: '2699.99'
+                    stock_quantity: 20
+                    image_url: 'http://localhost:8080/storage/products/notebook_dell_updated.jpg'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T12:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Produto atualizado com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'Notebook Dell Inspiron 15'
+                      description:
+                        type: string
+                        example: 'Notebook Dell com processador i7 atualizado'
+                      price:
+                        type: string
+                        example: '2699.99'
+                      stock_quantity:
+                        type: integer
+                        example: 20
+                      image_url:
+                        type: string
+                        example: 'http://localhost:8080/storage/products/notebook_dell_updated.jpg'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T12:30:00.000000Z'
+        404:
+          description: 'Produto não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Produto não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Produto não encontrado'
+        422:
+          description: 'Erro de validação'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Erro na validação dos dados'
+                  errors:
+                    name:
+                      - 'O produto com este nome já existe.'
+                    price:
+                      - 'O campo preço deve ser maior que 0.'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Erro na validação dos dados'
+                  errors:
+                    type: object
+                    properties:
+                      name:
+                        type: array
+                        example:
+                          - 'O produto com este nome já existe.'
+                        items:
+                          type: string
+                      price:
+                        type: array
+                        example:
+                          - 'O campo preço deve ser maior que 0.'
+                        items:
+                          type: string
+      tags:
+        - '📦 Produtos'
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Nome do produto. Deve ser único (exceto para o próprio produto).'
+                  example: 'Notebook Dell Inspiron 15'
+                description:
+                  type: string
+                  description: 'Descrição atualizada do produto.'
+                  example: 'Notebook Dell com processador i7 atualizado'
+                  nullable: true
+                price:
+                  type: number
+                  description: 'Novo preço do produto (máximo 2 decimais). Deve ser maior que 0.'
+                  example: 2699.99
+                stock_quantity:
+                  type: integer
+                  description: 'Nova quantidade em estoque. Deve ser >= 0.'
+                  example: 20
+                image:
+                  type: string
+                  format: binary
+                  description: 'Nova imagem do produto (substitui a anterior). Formatos aceitos: jpg, jpeg, png, gif. Tamanho máximo: 2MB.'
+                  nullable: true
+    delete:
+      summary: 'Excluir produto'
+      operationId: excluirProduto
+      description: "Remove um produto do sistema.\nNão é possível excluir produtos que possuem vendas associadas (regra de negócio).\nA imagem do produto também será removida do armazenamento."
+      parameters: []
+      responses:
+        200:
+          description: 'Produto excluído'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Produto excluído com sucesso'
+                  data: null
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Produto excluído com sucesso'
+                  data:
+                    type: string
+                    example: null
+                    nullable: true
+        404:
+          description: 'Produto não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Produto não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Produto não encontrado'
+        409:
+          description: 'Produto possui vendas'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Não é possível excluir o produto pois ele possui vendas associadas'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Não é possível excluir o produto pois ele possui vendas associadas'
+      tags:
+        - '📦 Produtos'
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'ID do produto.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/customers:
+    get:
+      summary: 'Listar clientes'
+      operationId: listarClientes
+      description: "Retorna uma lista paginada de clientes com opções de busca e filtro.\nSuporta busca por nome, email e CPF."
+      parameters:
+        -
+          in: query
+          name: search
+          description: 'Filtro de busca por nome, email ou CPF.'
+          example: 'João Silva'
+          required: false
+          schema:
+            type: string
+            description: 'Filtro de busca por nome, email ou CPF.'
+            example: 'João Silva'
+        -
+          in: query
+          name: per_page
+          description: 'Número de itens por página (padrão: 15, máximo: 100).'
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 'Número de itens por página (padrão: 15, máximo: 100).'
+            example: 20
+        -
+          in: query
+          name: page
+          description: 'Página a ser exibida (padrão: 1).'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'Página a ser exibida (padrão: 1).'
+            example: 1
+      responses:
+        200:
+          description: 'Lista de clientes'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    -
+                      id: 1
+                      name: 'João Silva'
+                      email: joao@exemplo.com
+                      cpf: 123.456.789-00
+                      phone: '(11) 99999-9999'
+                      created_at: '2026-03-06T10:30:00.000000Z'
+                      updated_at: '2026-03-06T10:30:00.000000Z'
+                    -
+                      id: 2
+                      name: 'Maria Santos'
+                      email: maria@exemplo.com
+                      cpf: 987.654.321-00
+                      phone: '(11) 88888-8888'
+                      created_at: '2026-03-06T11:00:00.000000Z'
+                      updated_at: '2026-03-06T11:00:00.000000Z'
+                  meta:
+                    current_page: 1
+                    per_page: 15
+                    total: 25
+                    last_page: 2
+                    from: 1
+                    to: 15
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        name: 'João Silva'
+                        email: joao@exemplo.com
+                        cpf: 123.456.789-00
+                        phone: '(11) 99999-9999'
+                        created_at: '2026-03-06T10:30:00.000000Z'
+                        updated_at: '2026-03-06T10:30:00.000000Z'
+                      -
+                        id: 2
+                        name: 'Maria Santos'
+                        email: maria@exemplo.com
+                        cpf: 987.654.321-00
+                        phone: '(11) 88888-8888'
+                        created_at: '2026-03-06T11:00:00.000000Z'
+                        updated_at: '2026-03-06T11:00:00.000000Z'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: 'João Silva'
+                        email:
+                          type: string
+                          example: joao@exemplo.com
+                        cpf:
+                          type: string
+                          example: 123.456.789-00
+                        phone:
+                          type: string
+                          example: '(11) 99999-9999'
+                        created_at:
+                          type: string
+                          example: '2026-03-06T10:30:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2026-03-06T10:30:00.000000Z'
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 15
+                      total:
+                        type: integer
+                        example: 25
+                      last_page:
+                        type: integer
+                        example: 2
+                      from:
+                        type: integer
+                        example: 1
+                      to:
+                        type: integer
+                        example: 15
+      tags:
+        - '👥 Clientes'
+    post:
+      summary: 'Criar cliente'
+      operationId: criarCliente
+      description: "Cria um novo cliente no sistema com validação completa incluindo validação de CPF.\nO CPF deve ser válido e único no sistema."
+      parameters: []
+      responses:
+        201:
+          description: 'Cliente criado com sucesso'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Cliente criado com sucesso'
+                  data:
+                    id: 1
+                    name: 'João Silva Santos'
+                    email: joao.santos@exemplo.com
+                    cpf: 123.456.789-00
+                    phone: '(11) 99999-9999'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T10:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Cliente criado com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'João Silva Santos'
+                      email:
+                        type: string
+                        example: joao.santos@exemplo.com
+                      cpf:
+                        type: string
+                        example: 123.456.789-00
+                      phone:
+                        type: string
+                        example: '(11) 99999-9999'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 'Erro de validação - CPF inválido'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        cpf:
+                          - 'O CPF informado é inválido.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          cpf:
+                            type: array
+                            example:
+                              - 'O CPF informado é inválido.'
+                            items:
+                              type: string
+                  -
+                    description: 'Erro de validação - Email já existe'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        email:
+                          - 'O email informado já está sendo usado.'
+                        cpf:
+                          - 'O CPF informado já está sendo usado.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          email:
+                            type: array
+                            example:
+                              - 'O email informado já está sendo usado.'
+                            items:
+                              type: string
+                          cpf:
+                            type: array
+                            example:
+                              - 'O CPF informado já está sendo usado.'
+                            items:
+                              type: string
+                  -
+                    description: 'Erro de validação - Campos obrigatórios'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        name:
+                          - 'O campo nome é obrigatório.'
+                        email:
+                          - 'O campo email é obrigatório.'
+                        cpf:
+                          - 'O campo CPF é obrigatório.'
+                        phone:
+                          - 'O campo telefone é obrigatório.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          name:
+                            type: array
+                            example:
+                              - 'O campo nome é obrigatório.'
+                            items:
+                              type: string
+                          email:
+                            type: array
+                            example:
+                              - 'O campo email é obrigatório.'
+                            items:
+                              type: string
+                          cpf:
+                            type: array
+                            example:
+                              - 'O campo CPF é obrigatório.'
+                            items:
+                              type: string
+                          phone:
+                            type: array
+                            example:
+                              - 'O campo telefone é obrigatório.'
+                            items:
+                              type: string
+      tags:
+        - '👥 Clientes'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Nome completo do cliente.'
+                  example: 'João Silva Santos'
+                email:
+                  type: string
+                  description: 'Email do cliente. Deve ser válido e único.'
+                  example: joao.santos@exemplo.com
+                cpf:
+                  type: string
+                  description: 'CPF do cliente. Deve ser um CPF válido e único.'
+                  example: '12345678900'
+                phone:
+                  type: string
+                  description: 'Telefone do cliente com DDD.'
+                  example: '11999999999'
+              required:
+                - name
+                - email
+                - cpf
+                - phone
+  '/api/customers/{id}':
+    get:
+      summary: 'Exibir cliente'
+      operationId: exibirCliente
+      description: "Retorna os detalhes completos de um cliente específico, incluindo estatísticas de vendas.\nAs estatísticas incluem total de compras, valor total gasto e número de compras."
+      parameters: []
+      responses:
+        200:
+          description: 'Cliente encontrado com estatísticas'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    id: 1
+                    name: 'João Silva Santos'
+                    email: joao.santos@exemplo.com
+                    cpf: 123.456.789-00
+                    phone: '(11) 99999-9999'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T10:30:00.000000Z'
+                    sales_stats:
+                      total_sales: 5
+                      total_amount: '12500.50'
+                      average_order_value: '2500.10'
+                      last_purchase: '2026-03-05T15:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'João Silva Santos'
+                      email:
+                        type: string
+                        example: joao.santos@exemplo.com
+                      cpf:
+                        type: string
+                        example: 123.456.789-00
+                      phone:
+                        type: string
+                        example: '(11) 99999-9999'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      sales_stats:
+                        type: object
+                        properties:
+                          total_sales:
+                            type: integer
+                            example: 5
+                          total_amount:
+                            type: string
+                            example: '12500.50'
+                          average_order_value:
+                            type: string
+                            example: '2500.10'
+                          last_purchase:
+                            type: string
+                            example: '2026-03-05T15:30:00.000000Z'
+        404:
+          description: 'Cliente não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Cliente não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cliente não encontrado'
+      tags:
+        - '👥 Clientes'
+    put:
+      summary: 'Atualizar cliente'
+      operationId: atualizarCliente
+      description: "Atualiza os dados de um cliente existente.\nPermite atualização parcial dos campos com validação completa incluindo CPF."
+      parameters: []
+      responses:
+        200:
+          description: 'Cliente atualizado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Cliente atualizado com sucesso'
+                  data:
+                    id: 1
+                    name: 'João Silva Santos Junior'
+                    email: joao.junior@exemplo.com
+                    cpf: 123.456.789-01
+                    phone: '(11) 88888-8888'
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T12:30:00.000000Z'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Cliente atualizado com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: 'João Silva Santos Junior'
+                      email:
+                        type: string
+                        example: joao.junior@exemplo.com
+                      cpf:
+                        type: string
+                        example: 123.456.789-01
+                      phone:
+                        type: string
+                        example: '(11) 88888-8888'
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T12:30:00.000000Z'
+        404:
+          description: 'Cliente não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Cliente não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cliente não encontrado'
+        422:
+          description: 'Erro de validação'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Erro na validação dos dados'
+                  errors:
+                    email:
+                      - 'O email informado já está sendo usado.'
+                    cpf:
+                      - 'O CPF informado é inválido.'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Erro na validação dos dados'
+                  errors:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        example:
+                          - 'O email informado já está sendo usado.'
+                        items:
+                          type: string
+                      cpf:
+                        type: array
+                        example:
+                          - 'O CPF informado é inválido.'
+                        items:
+                          type: string
+      tags:
+        - '👥 Clientes'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Nome completo do cliente.'
+                  example: 'João Silva Santos Junior'
+                email:
+                  type: string
+                  description: 'Email do cliente. Deve ser válido e único (exceto para o próprio cliente).'
+                  example: joao.junior@exemplo.com
+                cpf:
+                  type: string
+                  description: 'CPF do cliente. Deve ser um CPF válido e único (exceto para o próprio cliente).'
+                  example: '12345678901'
+                phone:
+                  type: string
+                  description: 'Telefone do cliente com DDD.'
+                  example: '11888888888'
+    delete:
+      summary: 'Excluir cliente'
+      operationId: excluirCliente
+      description: "Remove um cliente do sistema.\nNão é possível excluir clientes que possuem vendas associadas (regra de negócio).\nEsta regra protege a integridade referencial dos dados de vendas."
+      parameters: []
+      responses:
+        200:
+          description: 'Cliente excluído'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Cliente excluído com sucesso'
+                  data: null
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Cliente excluído com sucesso'
+                  data:
+                    type: string
+                    example: null
+                    nullable: true
+        404:
+          description: 'Cliente não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Cliente não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cliente não encontrado'
+        409:
+          description: 'Cliente possui vendas'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Não é possível excluir o cliente pois ele possui vendas associadas'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Não é possível excluir o cliente pois ele possui vendas associadas'
+      tags:
+        - '👥 Clientes'
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'ID do cliente.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/customers/{customer_id}/sales':
+    get:
+      summary: 'Listar vendas de um cliente'
+      operationId: listarVendasDeUmCliente
+      description: "Retorna todas as vendas realizadas por um cliente específico.\nÚtil para histórico de compras e análise de comportamento do cliente."
+      parameters:
+        -
+          in: query
+          name: status
+          description: 'Filtrar por status das vendas. Valores: pending, completed, cancelled.'
+          example: completed
+          required: false
+          schema:
+            type: string
+            description: 'Filtrar por status das vendas. Valores: pending, completed, cancelled.'
+            example: completed
+        -
+          in: query
+          name: per_page
+          description: 'Número de itens por página (padrão: 15, máximo: 100).'
+          example: 10
+          required: false
+          schema:
+            type: integer
+            description: 'Número de itens por página (padrão: 15, máximo: 100).'
+            example: 10
+        -
+          in: query
+          name: page
+          description: 'Página a ser exibida (padrão: 1).'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'Página a ser exibida (padrão: 1).'
+            example: 1
+      responses:
+        200:
+          description: 'Histórico de vendas do cliente'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    -
+                      id: 1
+                      status: completed
+                      subtotal: '2499.99'
+                      discount_percentage: '10.00'
+                      discount_amount: '249.99'
+                      total: '2250.00'
+                      items_count: 2
+                      created_at: '2026-03-06T10:30:00.000000Z'
+                      updated_at: '2026-03-06T11:00:00.000000Z'
+                      items:
+                        -
+                          id: 1
+                          product:
+                            id: 1
+                            name: 'Notebook Dell Inspiron'
+                            price: '2299.99'
+                          quantity: 1
+                          unit_price: '2299.99'
+                          subtotal: '2299.99'
+                    -
+                      id: 2
+                      status: pending
+                      subtotal: '399.90'
+                      discount_percentage: '5.00'
+                      discount_amount: '19.99'
+                      total: '379.91'
+                      items_count: 1
+                      created_at: '2026-03-05T14:20:00.000000Z'
+                      updated_at: '2026-03-05T14:20:00.000000Z'
+                      items:
+                        -
+                          id: 3
+                          product:
+                            id: 3
+                            name: 'Teclado Mecânico'
+                            price: '399.90'
+                          quantity: 1
+                          unit_price: '399.90'
+                          subtotal: '399.90'
+                  meta:
+                    current_page: 1
+                    per_page: 15
+                    total: 2
+                    last_page: 1
+                    from: 1
+                    to: 2
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        status: completed
+                        subtotal: '2499.99'
+                        discount_percentage: '10.00'
+                        discount_amount: '249.99'
+                        total: '2250.00'
+                        items_count: 2
+                        created_at: '2026-03-06T10:30:00.000000Z'
+                        updated_at: '2026-03-06T11:00:00.000000Z'
+                        items:
+                          -
+                            id: 1
+                            product:
+                              id: 1
+                              name: 'Notebook Dell Inspiron'
+                              price: '2299.99'
+                            quantity: 1
+                            unit_price: '2299.99'
+                            subtotal: '2299.99'
+                      -
+                        id: 2
+                        status: pending
+                        subtotal: '399.90'
+                        discount_percentage: '5.00'
+                        discount_amount: '19.99'
+                        total: '379.91'
+                        items_count: 1
+                        created_at: '2026-03-05T14:20:00.000000Z'
+                        updated_at: '2026-03-05T14:20:00.000000Z'
+                        items:
+                          -
+                            id: 3
+                            product:
+                              id: 3
+                              name: 'Teclado Mecânico'
+                              price: '399.90'
+                            quantity: 1
+                            unit_price: '399.90'
+                            subtotal: '399.90'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        status:
+                          type: string
+                          example: completed
+                        subtotal:
+                          type: string
+                          example: '2499.99'
+                        discount_percentage:
+                          type: string
+                          example: '10.00'
+                        discount_amount:
+                          type: string
+                          example: '249.99'
+                        total:
+                          type: string
+                          example: '2250.00'
+                        items_count:
+                          type: integer
+                          example: 2
+                        created_at:
+                          type: string
+                          example: '2026-03-06T10:30:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2026-03-06T11:00:00.000000Z'
+                        items:
+                          type: array
+                          example:
+                            -
+                              id: 1
+                              product:
+                                id: 1
+                                name: 'Notebook Dell Inspiron'
+                                price: '2299.99'
+                              quantity: 1
+                              unit_price: '2299.99'
+                              subtotal: '2299.99'
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 1
+                              product:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  name:
+                                    type: string
+                                    example: 'Notebook Dell Inspiron'
+                                  price:
+                                    type: string
+                                    example: '2299.99'
+                              quantity:
+                                type: integer
+                                example: 1
+                              unit_price:
+                                type: string
+                                example: '2299.99'
+                              subtotal:
+                                type: string
+                                example: '2299.99'
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 15
+                      total:
+                        type: integer
+                        example: 2
+                      last_page:
+                        type: integer
+                        example: 1
+                      from:
+                        type: integer
+                        example: 1
+                      to:
+                        type: integer
+                        example: 2
+        404:
+          description: 'Cliente não encontrado'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Cliente não encontrado'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Cliente não encontrado'
+      tags:
+        - '👥 Clientes'
+    parameters:
+      -
+        in: path
+        name: customer_id
+        description: 'The ID of the customer.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: customer
+        description: 'ID do cliente.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/sales:
+    get:
+      summary: 'Listar vendas'
+      operationId: listarVendas
+      description: "Retorna uma lista paginada de vendas com filtros opcionais.\nSuporta filtros por status, cliente, período e valor."
+      parameters:
+        -
+          in: query
+          name: status
+          description: 'Filtrar por status da venda. Valores: pending, completed, cancelled.'
+          example: completed
+          required: false
+          schema:
+            type: string
+            description: 'Filtrar por status da venda. Valores: pending, completed, cancelled.'
+            example: completed
+        -
+          in: query
+          name: customer_id
+          description: 'Filtrar por ID do cliente.'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'Filtrar por ID do cliente.'
+            example: 1
+        -
+          in: query
+          name: date_from
+          description: 'Filtrar vendas a partir desta data (YYYY-MM-DD).'
+          example: '2026-03-01'
+          required: false
+          schema:
+            type: string
+            description: 'Filtrar vendas a partir desta data (YYYY-MM-DD).'
+            example: '2026-03-01'
+        -
+          in: query
+          name: date_to
+          description: 'Filtrar vendas até esta data (YYYY-MM-DD).'
+          example: '2026-03-31'
+          required: false
+          schema:
+            type: string
+            description: 'Filtrar vendas até esta data (YYYY-MM-DD).'
+            example: '2026-03-31'
+        -
+          in: query
+          name: min_total
+          description: 'Valor mínimo total da venda.'
+          example: 100.0
+          required: false
+          schema:
+            type: number
+            description: 'Valor mínimo total da venda.'
+            example: 100.0
+        -
+          in: query
+          name: max_total
+          description: 'Valor máximo total da venda.'
+          example: 5000.0
+          required: false
+          schema:
+            type: number
+            description: 'Valor máximo total da venda.'
+            example: 5000.0
+        -
+          in: query
+          name: per_page
+          description: 'Número de itens por página (padrão: 15, máximo: 100).'
+          example: 20
+          required: false
+          schema:
+            type: integer
+            description: 'Número de itens por página (padrão: 15, máximo: 100).'
+            example: 20
+        -
+          in: query
+          name: page
+          description: 'Página a ser exibida (padrão: 1).'
+          example: 1
+          required: false
+          schema:
+            type: integer
+            description: 'Página a ser exibida (padrão: 1).'
+            example: 1
+      responses:
+        200:
+          description: 'Lista de vendas'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    -
+                      id: 1
+                      customer:
+                        id: 1
+                        name: 'João Silva'
+                        email: joao@exemplo.com
+                        cpf: 123.456.789-00
+                      status: completed
+                      subtotal: '2499.99'
+                      discount_percentage: '10.00'
+                      discount_amount: '249.99'
+                      total: '2250.00'
+                      items_count: 2
+                      created_at: '2026-03-06T10:30:00.000000Z'
+                      updated_at: '2026-03-06T11:00:00.000000Z'
+                      items:
+                        -
+                          id: 1
+                          product:
+                            id: 1
+                            name: 'Notebook Dell'
+                            price: '2299.99'
+                          quantity: 1
+                          unit_price: '2299.99'
+                          subtotal: '2299.99'
+                        -
+                          id: 2
+                          product:
+                            id: 2
+                            name: 'Mouse Logitech'
+                            price: '200.00'
+                          quantity: 1
+                          unit_price: '200.00'
+                          subtotal: '200.00'
+                  meta:
+                    current_page: 1
+                    per_page: 15
+                    total: 42
+                    last_page: 3
+                    from: 1
+                    to: 15
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        customer:
+                          id: 1
+                          name: 'João Silva'
+                          email: joao@exemplo.com
+                          cpf: 123.456.789-00
+                        status: completed
+                        subtotal: '2499.99'
+                        discount_percentage: '10.00'
+                        discount_amount: '249.99'
+                        total: '2250.00'
+                        items_count: 2
+                        created_at: '2026-03-06T10:30:00.000000Z'
+                        updated_at: '2026-03-06T11:00:00.000000Z'
+                        items:
+                          -
+                            id: 1
+                            product:
+                              id: 1
+                              name: 'Notebook Dell'
+                              price: '2299.99'
+                            quantity: 1
+                            unit_price: '2299.99'
+                            subtotal: '2299.99'
+                          -
+                            id: 2
+                            product:
+                              id: 2
+                              name: 'Mouse Logitech'
+                              price: '200.00'
+                            quantity: 1
+                            unit_price: '200.00'
+                            subtotal: '200.00'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        customer:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 'João Silva'
+                            email:
+                              type: string
+                              example: joao@exemplo.com
+                            cpf:
+                              type: string
+                              example: 123.456.789-00
+                        status:
+                          type: string
+                          example: completed
+                        subtotal:
+                          type: string
+                          example: '2499.99'
+                        discount_percentage:
+                          type: string
+                          example: '10.00'
+                        discount_amount:
+                          type: string
+                          example: '249.99'
+                        total:
+                          type: string
+                          example: '2250.00'
+                        items_count:
+                          type: integer
+                          example: 2
+                        created_at:
+                          type: string
+                          example: '2026-03-06T10:30:00.000000Z'
+                        updated_at:
+                          type: string
+                          example: '2026-03-06T11:00:00.000000Z'
+                        items:
+                          type: array
+                          example:
+                            -
+                              id: 1
+                              product:
+                                id: 1
+                                name: 'Notebook Dell'
+                                price: '2299.99'
+                              quantity: 1
+                              unit_price: '2299.99'
+                              subtotal: '2299.99'
+                            -
+                              id: 2
+                              product:
+                                id: 2
+                                name: 'Mouse Logitech'
+                                price: '200.00'
+                              quantity: 1
+                              unit_price: '200.00'
+                              subtotal: '200.00'
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                example: 1
+                              product:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                    example: 1
+                                  name:
+                                    type: string
+                                    example: 'Notebook Dell'
+                                  price:
+                                    type: string
+                                    example: '2299.99'
+                              quantity:
+                                type: integer
+                                example: 1
+                              unit_price:
+                                type: string
+                                example: '2299.99'
+                              subtotal:
+                                type: string
+                                example: '2299.99'
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      per_page:
+                        type: integer
+                        example: 15
+                      total:
+                        type: integer
+                        example: 42
+                      last_page:
+                        type: integer
+                        example: 3
+                      from:
+                        type: integer
+                        example: 1
+                      to:
+                        type: integer
+                        example: 15
+      tags:
+        - '💰 Vendas'
+    post:
+      summary: 'Criar venda'
+      operationId: criarVenda
+      description: "Cria uma nova venda com múltiplos produtos, aplicando validações de estoque e calculando descontos.\n\n## Processo de Criação\n1. Valida disponibilidade de estoque para todos os produtos\n2. Reserva o estoque temporariamente\n3. Calcula subtotal, desconto e total\n4. Cria a venda com status PENDING\n5. Cria os itens da venda\n\n## Validações Aplicadas\n- **Estoque**: Verifica se há quantidade suficiente\n- **Produtos**: Valida se todos os produtos existem\n- **Quantidades**: Devem ser maiores que zero\n- **Desconto**: Deve estar entre 0% e 100%"
+      parameters: []
+      responses:
+        201:
+          description: 'Venda criada com sucesso'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Venda criada com sucesso'
+                  data:
+                    id: 1
+                    customer:
+                      id: 1
+                      name: 'João Silva'
+                      email: joao@exemplo.com
+                      cpf: 123.456.789-00
+                      phone: '(11) 99999-9999'
+                    status: pending
+                    subtotal: '2499.99'
+                    discount_percentage: '10.50'
+                    discount_amount: '262.50'
+                    total: '2237.49'
+                    items_count: 2
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T10:30:00.000000Z'
+                    items:
+                      -
+                        id: 1
+                        product:
+                          id: 1
+                          name: 'Notebook Dell Inspiron'
+                          price: '2299.99'
+                          image_url: 'http://localhost:8080/storage/products/notebook.jpg'
+                        quantity: 1
+                        unit_price: '2299.99'
+                        subtotal: '2299.99'
+                      -
+                        id: 2
+                        product:
+                          id: 2
+                          name: 'Mouse Logitech'
+                          price: '200.00'
+                          image_url: 'http://localhost:8080/storage/products/mouse.jpg'
+                        quantity: 1
+                        unit_price: '200.00'
+                        subtotal: '200.00'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Venda criada com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      customer:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 'João Silva'
+                          email:
+                            type: string
+                            example: joao@exemplo.com
+                          cpf:
+                            type: string
+                            example: 123.456.789-00
+                          phone:
+                            type: string
+                            example: '(11) 99999-9999'
+                      status:
+                        type: string
+                        example: pending
+                      subtotal:
+                        type: string
+                        example: '2499.99'
+                      discount_percentage:
+                        type: string
+                        example: '10.50'
+                      discount_amount:
+                        type: string
+                        example: '262.50'
+                      total:
+                        type: string
+                        example: '2237.49'
+                      items_count:
+                        type: integer
+                        example: 2
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      items:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            product:
+                              id: 1
+                              name: 'Notebook Dell Inspiron'
+                              price: '2299.99'
+                              image_url: 'http://localhost:8080/storage/products/notebook.jpg'
+                            quantity: 1
+                            unit_price: '2299.99'
+                            subtotal: '2299.99'
+                          -
+                            id: 2
+                            product:
+                              id: 2
+                              name: 'Mouse Logitech'
+                              price: '200.00'
+                              image_url: 'http://localhost:8080/storage/products/mouse.jpg'
+                            quantity: 1
+                            unit_price: '200.00'
+                            subtotal: '200.00'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            product:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: string
+                                  example: 'Notebook Dell Inspiron'
+                                price:
+                                  type: string
+                                  example: '2299.99'
+                                image_url:
+                                  type: string
+                                  example: 'http://localhost:8080/storage/products/notebook.jpg'
+                            quantity:
+                              type: integer
+                              example: 1
+                            unit_price:
+                              type: string
+                              example: '2299.99'
+                            subtotal:
+                              type: string
+                              example: '2299.99'
+        400:
+          description: 'Falha na criação'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Falha ao criar a venda'
+                  errors:
+                    details: 'Erro específico do sistema'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Falha ao criar a venda'
+                  errors:
+                    type: object
+                    properties:
+                      details:
+                        type: string
+                        example: 'Erro específico do sistema'
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 'Estoque insuficiente'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Estoque insuficiente para um ou mais produtos'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Estoque insuficiente para um ou mais produtos'
+                  -
+                    description: 'Erro de validação'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Erro na validação dos dados'
+                      errors:
+                        customer_id:
+                          - 'O cliente selecionado é inválido.'
+                        items.0.quantity:
+                          - 'A quantidade deve ser maior que 0.'
+                        discount_percentage:
+                          - 'O desconto deve estar entre 0 e 100.'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Erro na validação dos dados'
+                      errors:
+                        type: object
+                        properties:
+                          customer_id:
+                            type: array
+                            example:
+                              - 'O cliente selecionado é inválido.'
+                            items:
+                              type: string
+                          items.0.quantity:
+                            type: array
+                            example:
+                              - 'A quantidade deve ser maior que 0.'
+                            items:
+                              type: string
+                          discount_percentage:
+                            type: array
+                            example:
+                              - 'O desconto deve estar entre 0 e 100.'
+                            items:
+                              type: string
+      tags:
+        - '💰 Vendas'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customer_id:
+                  type: integer
+                  description: 'ID do cliente. Deve existir na base de dados.'
+                  example: 1
+                discount_percentage:
+                  type: number
+                  description: 'Percentual de desconto (0-100). Padrão: 0.'
+                  example: 10.5
+                  nullable: true
+                items:
+                  type: array
+                  description: 'Lista de itens da venda. Mínimo 1 item.'
+                  example:
+                    - architecto
+                  items:
+                    type: string
+              required:
+                - customer_id
+                - items
+  '/api/sales/{id}':
+    get:
+      summary: 'Exibir venda'
+      operationId: exibirVenda
+      description: "Retorna os detalhes completos de uma venda específica, incluindo todos os itens,\ninformações do cliente e cálculos detalhados."
+      parameters: []
+      responses:
+        200:
+          description: 'Venda encontrada'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    id: 1
+                    customer:
+                      id: 1
+                      name: 'João Silva'
+                      email: joao@exemplo.com
+                      cpf: 123.456.789-00
+                      phone: '(11) 99999-9999'
+                    status: completed
+                    subtotal: '2499.99'
+                    discount_percentage: '10.50'
+                    discount_amount: '262.50'
+                    total: '2237.49'
+                    items_count: 2
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T11:00:00.000000Z'
+                    items:
+                      -
+                        id: 1
+                        product:
+                          id: 1
+                          name: 'Notebook Dell Inspiron'
+                          price: '2299.99'
+                          image_url: 'http://localhost:8080/storage/products/notebook.jpg'
+                        quantity: 1
+                        unit_price: '2299.99'
+                        subtotal: '2299.99'
+                      -
+                        id: 2
+                        product:
+                          id: 2
+                          name: 'Mouse Logitech'
+                          price: '200.00'
+                          image_url: 'http://localhost:8080/storage/products/mouse.jpg'
+                        quantity: 1
+                        unit_price: '200.00'
+                        subtotal: '200.00'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      customer:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 'João Silva'
+                          email:
+                            type: string
+                            example: joao@exemplo.com
+                          cpf:
+                            type: string
+                            example: 123.456.789-00
+                          phone:
+                            type: string
+                            example: '(11) 99999-9999'
+                      status:
+                        type: string
+                        example: completed
+                      subtotal:
+                        type: string
+                        example: '2499.99'
+                      discount_percentage:
+                        type: string
+                        example: '10.50'
+                      discount_amount:
+                        type: string
+                        example: '262.50'
+                      total:
+                        type: string
+                        example: '2237.49'
+                      items_count:
+                        type: integer
+                        example: 2
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T11:00:00.000000Z'
+                      items:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            product:
+                              id: 1
+                              name: 'Notebook Dell Inspiron'
+                              price: '2299.99'
+                              image_url: 'http://localhost:8080/storage/products/notebook.jpg'
+                            quantity: 1
+                            unit_price: '2299.99'
+                            subtotal: '2299.99'
+                          -
+                            id: 2
+                            product:
+                              id: 2
+                              name: 'Mouse Logitech'
+                              price: '200.00'
+                              image_url: 'http://localhost:8080/storage/products/mouse.jpg'
+                            quantity: 1
+                            unit_price: '200.00'
+                            subtotal: '200.00'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            product:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: string
+                                  example: 'Notebook Dell Inspiron'
+                                price:
+                                  type: string
+                                  example: '2299.99'
+                                image_url:
+                                  type: string
+                                  example: 'http://localhost:8080/storage/products/notebook.jpg'
+                            quantity:
+                              type: integer
+                              example: 1
+                            unit_price:
+                              type: string
+                              example: '2299.99'
+                            subtotal:
+                              type: string
+                              example: '2299.99'
+        404:
+          description: 'Venda não encontrada'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Venda não encontrada'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Venda não encontrada'
+      tags:
+        - '💰 Vendas'
+    put:
+      summary: 'Atualizar status da venda'
+      operationId: atualizarStatusDaVenda
+      description: "Altera o status de uma venda seguindo as regras de transição de status.\nEsta é uma operação crítica que afeta o controle de estoque.\n\n## Transições de Status\n\n### PENDING → COMPLETED\n- Confirma a venda\n- Deduz estoque definitivamente\n- Não pode ser revertido automaticamente\n\n### PENDING → CANCELLED\n- Cancela a venda\n- Libera estoque reservado\n- Operação definitiva\n\n### COMPLETED → CANCELLED\n- Cancela venda já finalizada\n- Restaura estoque deduzido\n- Requer verificação de estoque atual\n\n## Validações de Negócio\n- Verifica transição válida de status\n- Valida disponibilidade de estoque (para restauração)\n- Aplica regras de auditoria"
+      parameters: []
+      responses:
+        200:
+          description: 'Status atualizado - PENDING para COMPLETED'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Status da venda atualizado com sucesso'
+                  data:
+                    id: 1
+                    customer:
+                      id: 1
+                      name: 'João Silva'
+                      email: joao@exemplo.com
+                      cpf: 123.456.789-00
+                    status: completed
+                    subtotal: '2499.99'
+                    discount_percentage: '10.50'
+                    discount_amount: '262.50'
+                    total: '2237.49'
+                    items_count: 2
+                    created_at: '2026-03-06T10:30:00.000000Z'
+                    updated_at: '2026-03-06T11:00:00.000000Z'
+                    items:
+                      -
+                        id: 1
+                        product:
+                          id: 1
+                          name: 'Notebook Dell Inspiron'
+                          price: '2299.99'
+                        quantity: 1
+                        unit_price: '2299.99'
+                        subtotal: '2299.99'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Status da venda atualizado com sucesso'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      customer:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 'João Silva'
+                          email:
+                            type: string
+                            example: joao@exemplo.com
+                          cpf:
+                            type: string
+                            example: 123.456.789-00
+                      status:
+                        type: string
+                        example: completed
+                      subtotal:
+                        type: string
+                        example: '2499.99'
+                      discount_percentage:
+                        type: string
+                        example: '10.50'
+                      discount_amount:
+                        type: string
+                        example: '262.50'
+                      total:
+                        type: string
+                        example: '2237.49'
+                      items_count:
+                        type: integer
+                        example: 2
+                      created_at:
+                        type: string
+                        example: '2026-03-06T10:30:00.000000Z'
+                      updated_at:
+                        type: string
+                        example: '2026-03-06T11:00:00.000000Z'
+                      items:
+                        type: array
+                        example:
+                          -
+                            id: 1
+                            product:
+                              id: 1
+                              name: 'Notebook Dell Inspiron'
+                              price: '2299.99'
+                            quantity: 1
+                            unit_price: '2299.99'
+                            subtotal: '2299.99'
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            product:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: string
+                                  example: 'Notebook Dell Inspiron'
+                                price:
+                                  type: string
+                                  example: '2299.99'
+                            quantity:
+                              type: integer
+                              example: 1
+                            unit_price:
+                              type: string
+                              example: '2299.99'
+                            subtotal:
+                              type: string
+                              example: '2299.99'
+        400:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 'Transição de status inválida'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Transição de status inválida'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Transição de status inválida'
+                  -
+                    description: 'Falha na atualização'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Falha ao atualizar a venda'
+                      errors:
+                        details: 'Erro específico do sistema'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Falha ao atualizar a venda'
+                      errors:
+                        type: object
+                        properties:
+                          details:
+                            type: string
+                            example: 'Erro específico do sistema'
+        404:
+          description: 'Venda não encontrada'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Venda não encontrada'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Venda não encontrada'
+        422:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: 'Estoque insuficiente para cancelar'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Estoque insuficiente para completar a operação'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Estoque insuficiente para completar a operação'
+                  -
+                    description: 'Campo status obrigatório'
+                    type: object
+                    example:
+                      success: false
+                      message: 'Nenhum campo válido para atualização fornecido'
+                    properties:
+                      success:
+                        type: boolean
+                        example: false
+                      message:
+                        type: string
+                        example: 'Nenhum campo válido para atualização fornecido'
+      tags:
+        - '💰 Vendas'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: 'Novo status da venda. Valores: pending, completed, cancelled.'
+                  example: completed
+              required:
+                - status
+    delete:
+      summary: 'Excluir venda'
+      operationId: excluirVenda
+      description: "Remove uma venda do sistema com todas as suas validações e impactos.\n\n## Processo de Exclusão\n1. Verifica se a venda pode ser excluída\n2. Restaura estoque se necessário (dependendo do status)\n3. Remove itens da venda\n4. Remove a venda\n\n## Regras de Negócio\n- Vendas PENDING: Remove e libera estoque reservado\n- Vendas COMPLETED: Remove e restaura estoque deduzido\n- Vendas CANCELLED: Remove sem impacto no estoque\n\n## Impacto no Estoque\n- **PENDING**: Libera estoque reservado\n- **COMPLETED**: Adiciona de volta ao estoque\n- **CANCELLED**: Sem alteração (já estava liberado)"
+      parameters: []
+      responses:
+        200:
+          description: 'Venda excluída'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Venda excluída com sucesso'
+                  data: null
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Venda excluída com sucesso'
+                  data:
+                    type: string
+                    example: null
+                    nullable: true
+        400:
+          description: 'Falha na exclusão'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Falha ao criar a venda'
+                  errors:
+                    details: 'Erro específico do sistema'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Falha ao criar a venda'
+                  errors:
+                    type: object
+                    properties:
+                      details:
+                        type: string
+                        example: 'Erro específico do sistema'
+        404:
+          description: 'Venda não encontrada'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Venda não encontrada'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Venda não encontrada'
+      tags:
+        - '💰 Vendas'
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'ID da venda.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/sales/{sale_id}/items':
+    get:
+      summary: 'Listar itens de uma venda'
+      operationId: listarItensDeUmaVenda
+      description: "Retorna todos os itens de uma venda específica com detalhes dos produtos.\nÚtil para exibir o detalhamento completo dos produtos vendidos."
+      parameters: []
+      responses:
+        200:
+          description: 'Itens da venda'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: true
+                  message: 'Dados recuperados com sucesso'
+                  data:
+                    -
+                      id: 1
+                      product:
+                        id: 1
+                        name: 'Notebook Dell Inspiron'
+                        description: 'Notebook Dell com processador i7'
+                        price: '2299.99'
+                        image_url: 'http://localhost:8080/storage/products/notebook.jpg'
+                      quantity: 1
+                      unit_price: '2299.99'
+                      subtotal: '2299.99'
+                    -
+                      id: 2
+                      product:
+                        id: 2
+                        name: 'Mouse Logitech'
+                        description: 'Mouse sem fio com precisão óptica'
+                        price: '200.00'
+                        image_url: 'http://localhost:8080/storage/products/mouse.jpg'
+                      quantity: 1
+                      unit_price: '200.00'
+                      subtotal: '200.00'
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 'Dados recuperados com sucesso'
+                  data:
+                    type: array
+                    example:
+                      -
+                        id: 1
+                        product:
+                          id: 1
+                          name: 'Notebook Dell Inspiron'
+                          description: 'Notebook Dell com processador i7'
+                          price: '2299.99'
+                          image_url: 'http://localhost:8080/storage/products/notebook.jpg'
+                        quantity: 1
+                        unit_price: '2299.99'
+                        subtotal: '2299.99'
+                      -
+                        id: 2
+                        product:
+                          id: 2
+                          name: 'Mouse Logitech'
+                          description: 'Mouse sem fio com precisão óptica'
+                          price: '200.00'
+                          image_url: 'http://localhost:8080/storage/products/mouse.jpg'
+                        quantity: 1
+                        unit_price: '200.00'
+                        subtotal: '200.00'
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        product:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 1
+                            name:
+                              type: string
+                              example: 'Notebook Dell Inspiron'
+                            description:
+                              type: string
+                              example: 'Notebook Dell com processador i7'
+                            price:
+                              type: string
+                              example: '2299.99'
+                            image_url:
+                              type: string
+                              example: 'http://localhost:8080/storage/products/notebook.jpg'
+                        quantity:
+                          type: integer
+                          example: 1
+                        unit_price:
+                          type: string
+                          example: '2299.99'
+                        subtotal:
+                          type: string
+                          example: '2299.99'
+        404:
+          description: 'Venda não encontrada'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  success: false
+                  message: 'Venda não encontrada'
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: 'Venda não encontrada'
+      tags:
+        - '💰 Vendas'
+    parameters:
+      -
+        in: path
+        name: sale_id
+        description: 'The ID of the sale.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+      -
+        in: path
+        name: sale
+        description: 'ID da venda.'
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/health:
+    get:
+      summary: 'Health Check'
+      operationId: healthCheck
+      description: "Endpoint público para verificação de saúde da API.\nRetorna informações sobre o status da aplicação, timestamp e versão.\n\nEste endpoint é usado para:\n- Monitoramento de uptime\n- Load balancer health checks\n- Verificação de conectividade\n- Deploy validation"
+      parameters: []
+      responses:
+        200:
+          description: 'API funcionando corretamente'
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: healthy
+                  timestamp: '2026-03-06T13:45:00.012870Z'
+                  version: 1.0.0
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    example: '2026-03-06T13:45:00.012870Z'
+                  version:
+                    type: string
+                    example: 1.0.0
+      tags:
+        - '🛠️ Utilitários'
+      security: []

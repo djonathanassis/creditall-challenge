@@ -1,0 +1,1238 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost"
+        }
+    ],
+    "info": {
+        "name": "CreditAll Challenge API Documentation",
+        "_postman_id": "331c9ec3-3da3-4aac-855e-8a54699c6845",
+        "description": "API REST para gerenciamento de vendas, produtos e clientes do sistema CreditAll Challenge. Oferece funcionalidades completas de CRUD, controle de estoque, c\u00e1lculo de descontos e gerenciamento de status de vendas.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "\ud83d\udd10 Autentica\u00e7\u00e3o",
+            "description": "\nEndpoints para gerenciar autentica\u00e7\u00e3o de usu\u00e1rios na API.\nUtiliza Laravel Sanctum para autentica\u00e7\u00e3o baseada em tokens Bearer.",
+            "item": [
+                {
+                    "name": "Login de usu\u00e1rio",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/login",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/login"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"email\":\"usuario@exemplo.com\",\"password\":\"minhasenha123\"}"
+                        },
+                        "description": "Autentica um usu\u00e1rio com email e senha, retornando as informa\u00e7\u00f5es do usu\u00e1rio e um token de acesso.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Login realizado com sucesso\",\n  \"data\": {\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"Jo\u00e3o Silva\",\n      \"email\": \"joao@exemplo.com\",\n      \"email_verified_at\": \"2026-03-06T10:30:00.000000Z\",\n      \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n      \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n    },\n    \"token\": \"1|AbCdEfGhIjKlMnOpQrStUvWxYz1234567890abcdef\"\n  }\n}",
+                            "name": "Login bem-sucedido"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"email\": [\"As credenciais fornecidas s\u00e3o inv\u00e1lidas.\"]\n  }\n}",
+                            "name": "Credenciais inv\u00e1lidas"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"email\": [\"O campo email \u00e9 obrigat\u00f3rio.\"],\n    \"password\": [\"O campo senha \u00e9 obrigat\u00f3rio.\"]\n  }\n}",
+                            "name": "Dados de valida\u00e7\u00e3o inv\u00e1lidos"
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout de usu\u00e1rio",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/logout",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/logout"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Revoga o token de acesso atual do usu\u00e1rio autenticado, efetuando logout da sess\u00e3o."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Logout realizado com sucesso\",\n  \"data\": null\n}",
+                            "name": "Logout bem-sucedido"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Token de acesso inv\u00e1lido ou expirado\"\n}",
+                            "name": "Token inv\u00e1lido ou expirado"
+                        }
+                    ]
+                },
+                {
+                    "name": "Informa\u00e7\u00f5es do usu\u00e1rio autenticado",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/auth\/me",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/auth\/me"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna as informa\u00e7\u00f5es completas do usu\u00e1rio atualmente autenticado."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Jo\u00e3o Silva\",\n    \"email\": \"joao@exemplo.com\",\n    \"email_verified_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n  }\n}",
+                            "name": "Usu\u00e1rio autenticado"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Token de acesso inv\u00e1lido ou expirado\"\n}",
+                            "name": "Token inv\u00e1lido ou expirado"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "\ud83d\udce6 Produtos",
+            "description": "\nEndpoints para gerenciamento completo de produtos, incluindo CRUD, upload de imagens e controle de estoque.\nTodos os endpoints s\u00e3o protegidos por autentica\u00e7\u00e3o e possuem valida\u00e7\u00e3o rigorosa de dados.",
+            "item": [
+                {
+                    "name": "Listar produtos",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/products",
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "notebook",
+                                    "description": "Filtro de busca por nome do produto.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "min_price",
+                                    "value": "100",
+                                    "description": "Pre\u00e7o m\u00ednimo para filtrar produtos.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "max_price",
+                                    "value": "1000",
+                                    "description": "Pre\u00e7o m\u00e1ximo para filtrar produtos.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20",
+                                    "description": "N\u00famero de itens por p\u00e1gina (padr\u00e3o: 15, m\u00e1ximo: 100).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "P\u00e1gina a ser exibida (padr\u00e3o: 1).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/products?search=notebook&min_price=100&max_price=1000&per_page=20&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna uma lista paginada de produtos com op\u00e7\u00f5es de filtro e busca.\nSuporta filtros por nome, categoria e faixa de pre\u00e7o."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Notebook Dell Inspiron\",\n      \"description\": \"Notebook Dell com processador i7 e 16GB RAM\",\n      \"price\": \"2499.99\",\n      \"stock_quantity\": 15,\n      \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook_dell.jpg\",\n      \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n      \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Mouse Logitech MX\",\n      \"description\": \"Mouse sem fio com precis\u00e3o \u00f3ptica\",\n      \"price\": \"199.90\",\n      \"stock_quantity\": 50,\n      \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/mouse_logitech.jpg\",\n      \"created_at\": \"2026-03-06T11:00:00.000000Z\",\n      \"updated_at\": \"2026-03-06T11:00:00.000000Z\"\n    }\n  ],\n  \"meta\": {\n    \"current_page\": 1,\n    \"per_page\": 15,\n    \"total\": 50,\n    \"last_page\": 4,\n    \"from\": 1,\n    \"to\": 15\n  }\n}",
+                            "name": "Lista de produtos"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Token de acesso inv\u00e1lido ou expirado\"\n}",
+                            "name": "Token inv\u00e1lido"
+                        }
+                    ]
+                },
+                {
+                    "name": "Criar produto",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/products",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/products"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Notebook Dell Inspiron",
+                                    "type": "text",
+                                    "description": "Nome do produto. Deve ser \u00fanico."
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Notebook Dell com processador i7, 16GB RAM e SSD 512GB",
+                                    "type": "text",
+                                    "description": "Descri\u00e7\u00e3o detalhada do produto."
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "2499.99",
+                                    "type": "text",
+                                    "description": "Pre\u00e7o do produto (m\u00e1ximo 2 decimais). Deve ser maior que 0."
+                                },
+                                {
+                                    "key": "stock_quantity",
+                                    "value": "15",
+                                    "type": "text",
+                                    "description": "Quantidade em estoque. Deve ser >= 0."
+                                },
+                                {
+                                    "key": "image",
+                                    "src": [],
+                                    "type": "file"
+                                }
+                            ]
+                        },
+                        "description": "Cria um novo produto no sistema com valida\u00e7\u00e3o completa de dados.\nSuporta upload de imagem opcional."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Produto criado com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Notebook Dell Inspiron\",\n    \"description\": \"Notebook Dell com processador i7, 16GB RAM e SSD 512GB\",\n    \"price\": \"2499.99\",\n    \"stock_quantity\": 15,\n    \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook_dell.jpg\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n  }\n}",
+                            "name": "Produto criado com sucesso"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"name\": [\"O campo nome \u00e9 obrigat\u00f3rio.\"],\n    \"price\": [\"O campo pre\u00e7o deve ser maior que 0.\"],\n    \"stock_quantity\": [\"O campo quantidade deve ser um n\u00famero inteiro.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"name\": [\"O produto com este nome j\u00e1 existe.\"]\n  }\n}",
+                            "name": "Produto j\u00e1 existe"
+                        }
+                    ]
+                },
+                {
+                    "name": "Exibir produto",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/products\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/products\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID do produto."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna os detalhes completos de um produto espec\u00edfico."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Notebook Dell Inspiron\",\n    \"description\": \"Notebook Dell com processador i7, 16GB RAM e SSD 512GB\",\n    \"price\": \"2499.99\",\n    \"stock_quantity\": 15,\n    \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook_dell.jpg\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n  }\n}",
+                            "name": "Produto encontrado"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Produto n\u00e3o encontrado\"\n}",
+                            "name": "Produto n\u00e3o encontrado"
+                        }
+                    ]
+                },
+                {
+                    "name": "Atualizar produto",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/products\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/products\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID do produto."
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "multipart\/form-data"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Notebook Dell Inspiron 15",
+                                    "type": "text",
+                                    "description": "Nome do produto. Deve ser \u00fanico (exceto para o pr\u00f3prio produto)."
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Notebook Dell com processador i7 atualizado",
+                                    "type": "text",
+                                    "description": "Descri\u00e7\u00e3o atualizada do produto."
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "2699.99",
+                                    "type": "text",
+                                    "description": "Novo pre\u00e7o do produto (m\u00e1ximo 2 decimais). Deve ser maior que 0."
+                                },
+                                {
+                                    "key": "stock_quantity",
+                                    "value": "20",
+                                    "type": "text",
+                                    "description": "Nova quantidade em estoque. Deve ser >= 0."
+                                },
+                                {
+                                    "key": "image",
+                                    "src": [],
+                                    "type": "file"
+                                },
+                                {
+                                    "key": "_method",
+                                    "value": "PUT",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "description": "Atualiza os dados de um produto existente.\nPermite atualiza\u00e7\u00e3o parcial dos campos e substitui\u00e7\u00e3o da imagem."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Produto atualizado com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Notebook Dell Inspiron 15\",\n    \"description\": \"Notebook Dell com processador i7 atualizado\",\n    \"price\": \"2699.99\",\n    \"stock_quantity\": 20,\n    \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook_dell_updated.jpg\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T12:30:00.000000Z\"\n  }\n}",
+                            "name": "Produto atualizado"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Produto n\u00e3o encontrado\"\n}",
+                            "name": "Produto n\u00e3o encontrado"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"name\": [\"O produto com este nome j\u00e1 existe.\"],\n    \"price\": [\"O campo pre\u00e7o deve ser maior que 0.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o"
+                        }
+                    ]
+                },
+                {
+                    "name": "Excluir produto",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/products\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/products\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID do produto."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Remove um produto do sistema.\nN\u00e3o \u00e9 poss\u00edvel excluir produtos que possuem vendas associadas (regra de neg\u00f3cio).\nA imagem do produto tamb\u00e9m ser\u00e1 removida do armazenamento."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Produto exclu\u00eddo com sucesso\",\n  \"data\": null\n}",
+                            "name": "Produto exclu\u00eddo"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Produto n\u00e3o encontrado\"\n}",
+                            "name": "Produto n\u00e3o encontrado"
+                        },
+                        {
+                            "header": [],
+                            "code": 409,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"N\u00e3o \u00e9 poss\u00edvel excluir o produto pois ele possui vendas associadas\"\n}",
+                            "name": "Produto possui vendas"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "\ud83d\udc65 Clientes",
+            "description": "\nEndpoints para gerenciamento completo de clientes, incluindo CRUD, valida\u00e7\u00e3o de CPF e estat\u00edsticas de vendas.\nTodos os endpoints s\u00e3o protegidos por autentica\u00e7\u00e3o.",
+            "item": [
+                {
+                    "name": "Listar clientes",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/customers",
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "Jo%C3%A3o+Silva",
+                                    "description": "Filtro de busca por nome, email ou CPF.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20",
+                                    "description": "N\u00famero de itens por p\u00e1gina (padr\u00e3o: 15, m\u00e1ximo: 100).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "P\u00e1gina a ser exibida (padr\u00e3o: 1).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/customers?search=Jo%C3%A3o+Silva&per_page=20&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna uma lista paginada de clientes com op\u00e7\u00f5es de busca e filtro.\nSuporta busca por nome, email e CPF."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Jo\u00e3o Silva\",\n      \"email\": \"joao@exemplo.com\",\n      \"cpf\": \"123.456.789-00\",\n      \"phone\": \"(11) 99999-9999\",\n      \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n      \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Maria Santos\",\n      \"email\": \"maria@exemplo.com\",\n      \"cpf\": \"987.654.321-00\",\n      \"phone\": \"(11) 88888-8888\",\n      \"created_at\": \"2026-03-06T11:00:00.000000Z\",\n      \"updated_at\": \"2026-03-06T11:00:00.000000Z\"\n    }\n  ],\n  \"meta\": {\n    \"current_page\": 1,\n    \"per_page\": 15,\n    \"total\": 25,\n    \"last_page\": 2,\n    \"from\": 1,\n    \"to\": 15\n  }\n}",
+                            "name": "Lista de clientes"
+                        }
+                    ]
+                },
+                {
+                    "name": "Criar cliente",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/customers",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/customers"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Jo\u00e3o Silva Santos\",\"email\":\"joao.santos@exemplo.com\",\"cpf\":\"12345678900\",\"phone\":\"11999999999\"}"
+                        },
+                        "description": "Cria um novo cliente no sistema com valida\u00e7\u00e3o completa incluindo valida\u00e7\u00e3o de CPF.\nO CPF deve ser v\u00e1lido e \u00fanico no sistema."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Cliente criado com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Jo\u00e3o Silva Santos\",\n    \"email\": \"joao.santos@exemplo.com\",\n    \"cpf\": \"123.456.789-00\",\n    \"phone\": \"(11) 99999-9999\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T10:30:00.000000Z\"\n  }\n}",
+                            "name": "Cliente criado com sucesso"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"cpf\": [\"O CPF informado \u00e9 inv\u00e1lido.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o - CPF inv\u00e1lido"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"email\": [\"O email informado j\u00e1 est\u00e1 sendo usado.\"],\n    \"cpf\": [\"O CPF informado j\u00e1 est\u00e1 sendo usado.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o - Email j\u00e1 existe"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"name\": [\"O campo nome \u00e9 obrigat\u00f3rio.\"],\n    \"email\": [\"O campo email \u00e9 obrigat\u00f3rio.\"],\n    \"cpf\": [\"O campo CPF \u00e9 obrigat\u00f3rio.\"],\n    \"phone\": [\"O campo telefone \u00e9 obrigat\u00f3rio.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o - Campos obrigat\u00f3rios"
+                        }
+                    ]
+                },
+                {
+                    "name": "Exibir cliente",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID do cliente."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna os detalhes completos de um cliente espec\u00edfico, incluindo estat\u00edsticas de vendas.\nAs estat\u00edsticas incluem total de compras, valor total gasto e n\u00famero de compras."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Jo\u00e3o Silva Santos\",\n    \"email\": \"joao.santos@exemplo.com\",\n    \"cpf\": \"123.456.789-00\",\n    \"phone\": \"(11) 99999-9999\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"sales_stats\": {\n      \"total_sales\": 5,\n      \"total_amount\": \"12500.50\",\n      \"average_order_value\": \"2500.10\",\n      \"last_purchase\": \"2026-03-05T15:30:00.000000Z\"\n    }\n  }\n}",
+                            "name": "Cliente encontrado com estat\u00edsticas"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Cliente n\u00e3o encontrado\"\n}",
+                            "name": "Cliente n\u00e3o encontrado"
+                        }
+                    ]
+                },
+                {
+                    "name": "Atualizar cliente",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID do cliente."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"Jo\u00e3o Silva Santos Junior\",\"email\":\"joao.junior@exemplo.com\",\"cpf\":\"12345678901\",\"phone\":\"11888888888\"}"
+                        },
+                        "description": "Atualiza os dados de um cliente existente.\nPermite atualiza\u00e7\u00e3o parcial dos campos com valida\u00e7\u00e3o completa incluindo CPF."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Cliente atualizado com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Jo\u00e3o Silva Santos Junior\",\n    \"email\": \"joao.junior@exemplo.com\",\n    \"cpf\": \"123.456.789-01\",\n    \"phone\": \"(11) 88888-8888\",\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T12:30:00.000000Z\"\n  }\n}",
+                            "name": "Cliente atualizado"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Cliente n\u00e3o encontrado\"\n}",
+                            "name": "Cliente n\u00e3o encontrado"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"email\": [\"O email informado j\u00e1 est\u00e1 sendo usado.\"],\n    \"cpf\": [\"O CPF informado \u00e9 inv\u00e1lido.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o"
+                        }
+                    ]
+                },
+                {
+                    "name": "Excluir cliente",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/customers\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/customers\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID do cliente."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Remove um cliente do sistema.\nN\u00e3o \u00e9 poss\u00edvel excluir clientes que possuem vendas associadas (regra de neg\u00f3cio).\nEsta regra protege a integridade referencial dos dados de vendas."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Cliente exclu\u00eddo com sucesso\",\n  \"data\": null\n}",
+                            "name": "Cliente exclu\u00eddo"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Cliente n\u00e3o encontrado\"\n}",
+                            "name": "Cliente n\u00e3o encontrado"
+                        },
+                        {
+                            "header": [],
+                            "code": 409,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"N\u00e3o \u00e9 poss\u00edvel excluir o cliente pois ele possui vendas associadas\"\n}",
+                            "name": "Cliente possui vendas"
+                        }
+                    ]
+                },
+                {
+                    "name": "Listar vendas de um cliente",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/customers\/:customer_id\/sales",
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "completed",
+                                    "description": "Filtrar por status das vendas. Valores: pending, completed, cancelled.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10",
+                                    "description": "N\u00famero de itens por p\u00e1gina (padr\u00e3o: 15, m\u00e1ximo: 100).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "P\u00e1gina a ser exibida (padr\u00e3o: 1).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/customers\/:customer_id\/sales?status=completed&per_page=10&page=1",
+                            "variable": [
+                                {
+                                    "id": "customer_id",
+                                    "key": "customer_id",
+                                    "value": "16",
+                                    "description": "The ID of the customer."
+                                },
+                                {
+                                    "id": "customer",
+                                    "key": "customer",
+                                    "value": "1",
+                                    "description": "ID do cliente."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna todas as vendas realizadas por um cliente espec\u00edfico.\n\u00datil para hist\u00f3rico de compras e an\u00e1lise de comportamento do cliente."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"status\": \"completed\",\n      \"subtotal\": \"2499.99\",\n      \"discount_percentage\": \"10.00\",\n      \"discount_amount\": \"249.99\",\n      \"total\": \"2250.00\",\n      \"items_count\": 2,\n      \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n      \"updated_at\": \"2026-03-06T11:00:00.000000Z\",\n      \"items\": [\n        {\n          \"id\": 1,\n          \"product\": {\n            \"id\": 1,\n            \"name\": \"Notebook Dell Inspiron\",\n            \"price\": \"2299.99\"\n          },\n          \"quantity\": 1,\n          \"unit_price\": \"2299.99\",\n          \"subtotal\": \"2299.99\"\n        }\n      ]\n    },\n    {\n      \"id\": 2,\n      \"status\": \"pending\",\n      \"subtotal\": \"399.90\",\n      \"discount_percentage\": \"5.00\",\n      \"discount_amount\": \"19.99\",\n      \"total\": \"379.91\",\n      \"items_count\": 1,\n      \"created_at\": \"2026-03-05T14:20:00.000000Z\",\n      \"updated_at\": \"2026-03-05T14:20:00.000000Z\",\n      \"items\": [\n        {\n          \"id\": 3,\n          \"product\": {\n            \"id\": 3,\n            \"name\": \"Teclado Mec\u00e2nico\",\n            \"price\": \"399.90\"\n          },\n          \"quantity\": 1,\n          \"unit_price\": \"399.90\",\n          \"subtotal\": \"399.90\"\n        }\n      ]\n    }\n  ],\n  \"meta\": {\n    \"current_page\": 1,\n    \"per_page\": 15,\n    \"total\": 2,\n    \"last_page\": 1,\n    \"from\": 1,\n    \"to\": 2\n  }\n}",
+                            "name": "Hist\u00f3rico de vendas do cliente"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Cliente n\u00e3o encontrado\"\n}",
+                            "name": "Cliente n\u00e3o encontrado"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "\ud83d\udcb0 Vendas",
+            "description": "\nEndpoints para gerenciamento completo de vendas com l\u00f3gica de neg\u00f3cio complexa.\nInclui cria\u00e7\u00e3o de vendas com m\u00faltiplos itens, controle de estoque, descontos e gest\u00e3o de status.\n\n## Status de Vendas\n\nAs vendas seguem um fluxo de status bem definido:\n\n- **PENDING**: Venda criada, aguardando processamento\n- **COMPLETED**: Venda finalizada, estoque deduzido\n- **CANCELLED**: Venda cancelada, estoque restaurado\n\n## Transi\u00e7\u00f5es de Status Permitidas\n\n- PENDING \u2192 COMPLETED: Confirma a venda e deduz estoque\n- PENDING \u2192 CANCELLED: Cancela a venda\n- COMPLETED \u2192 CANCELLED: Cancela venda finalizada (restaura estoque)\n\n## L\u00f3gica de Estoque\n\n- **Cria\u00e7\u00e3o**: Reserva estoque (n\u00e3o deduz)\n- **COMPLETED**: Deduz estoque definitivamente\n- **CANCELLED**: Restaura estoque reservado\/deduzido\n\n## Sistema de Descontos\n\n- Desconto percentual aplicado sobre o subtotal\n- C\u00e1lculo: subtotal - (subtotal * desconto \/ 100)\n- Valida\u00e7\u00e3o autom\u00e1tica de produtos e quantidades",
+            "item": [
+                {
+                    "name": "Listar vendas",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/sales",
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "completed",
+                                    "description": "Filtrar por status da venda. Valores: pending, completed, cancelled.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "customer_id",
+                                    "value": "1",
+                                    "description": "Filtrar por ID do cliente.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "date_from",
+                                    "value": "2026-03-01",
+                                    "description": "Filtrar vendas a partir desta data (YYYY-MM-DD).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2026-03-31",
+                                    "description": "Filtrar vendas at\u00e9 esta data (YYYY-MM-DD).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "min_total",
+                                    "value": "100",
+                                    "description": "Valor m\u00ednimo total da venda.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "max_total",
+                                    "value": "5000",
+                                    "description": "Valor m\u00e1ximo total da venda.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20",
+                                    "description": "N\u00famero de itens por p\u00e1gina (padr\u00e3o: 15, m\u00e1ximo: 100).",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "P\u00e1gina a ser exibida (padr\u00e3o: 1).",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/api\/sales?status=completed&customer_id=1&date_from=2026-03-01&date_to=2026-03-31&min_total=100&max_total=5000&per_page=20&page=1"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna uma lista paginada de vendas com filtros opcionais.\nSuporta filtros por status, cliente, per\u00edodo e valor."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"customer\": {\n        \"id\": 1,\n        \"name\": \"Jo\u00e3o Silva\",\n        \"email\": \"joao@exemplo.com\",\n        \"cpf\": \"123.456.789-00\"\n      },\n      \"status\": \"completed\",\n      \"subtotal\": \"2499.99\",\n      \"discount_percentage\": \"10.00\",\n      \"discount_amount\": \"249.99\",\n      \"total\": \"2250.00\",\n      \"items_count\": 2,\n      \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n      \"updated_at\": \"2026-03-06T11:00:00.000000Z\",\n      \"items\": [\n        {\n          \"id\": 1,\n          \"product\": {\n            \"id\": 1,\n            \"name\": \"Notebook Dell\",\n            \"price\": \"2299.99\"\n          },\n          \"quantity\": 1,\n          \"unit_price\": \"2299.99\",\n          \"subtotal\": \"2299.99\"\n        },\n        {\n          \"id\": 2,\n          \"product\": {\n            \"id\": 2,\n            \"name\": \"Mouse Logitech\",\n            \"price\": \"200.00\"\n          },\n          \"quantity\": 1,\n          \"unit_price\": \"200.00\",\n          \"subtotal\": \"200.00\"\n        }\n      ]\n    }\n  ],\n  \"meta\": {\n    \"current_page\": 1,\n    \"per_page\": 15,\n    \"total\": 42,\n    \"last_page\": 3,\n    \"from\": 1,\n    \"to\": 15\n  }\n}",
+                            "name": "Lista de vendas"
+                        }
+                    ]
+                },
+                {
+                    "name": "Criar venda",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/sales",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/sales"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"customer_id\":1,\"discount_percentage\":10.5,\"items\":[\"architecto\"]}"
+                        },
+                        "description": "Cria uma nova venda com m\u00faltiplos produtos, aplicando valida\u00e7\u00f5es de estoque e calculando descontos.\n\n## Processo de Cria\u00e7\u00e3o\n1. Valida disponibilidade de estoque para todos os produtos\n2. Reserva o estoque temporariamente\n3. Calcula subtotal, desconto e total\n4. Cria a venda com status PENDING\n5. Cria os itens da venda\n\n## Valida\u00e7\u00f5es Aplicadas\n- **Estoque**: Verifica se h\u00e1 quantidade suficiente\n- **Produtos**: Valida se todos os produtos existem\n- **Quantidades**: Devem ser maiores que zero\n- **Desconto**: Deve estar entre 0% e 100%"
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 201,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Venda criada com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"customer\": {\n      \"id\": 1,\n      \"name\": \"Jo\u00e3o Silva\",\n      \"email\": \"joao@exemplo.com\",\n      \"cpf\": \"123.456.789-00\",\n      \"phone\": \"(11) 99999-9999\"\n    },\n    \"status\": \"pending\",\n    \"subtotal\": \"2499.99\",\n    \"discount_percentage\": \"10.50\",\n    \"discount_amount\": \"262.50\",\n    \"total\": \"2237.49\",\n    \"items_count\": 2,\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product\": {\n          \"id\": 1,\n          \"name\": \"Notebook Dell Inspiron\",\n          \"price\": \"2299.99\",\n          \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook.jpg\"\n        },\n        \"quantity\": 1,\n        \"unit_price\": \"2299.99\",\n        \"subtotal\": \"2299.99\"\n      },\n      {\n        \"id\": 2,\n        \"product\": {\n          \"id\": 2,\n          \"name\": \"Mouse Logitech\",\n          \"price\": \"200.00\",\n          \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/mouse.jpg\"\n        },\n        \"quantity\": 1,\n        \"unit_price\": \"200.00\",\n        \"subtotal\": \"200.00\"\n      }\n    ]\n  }\n}",
+                            "name": "Venda criada com sucesso"
+                        },
+                        {
+                            "header": [],
+                            "code": 400,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Falha ao criar a venda\",\n  \"errors\": {\n    \"details\": \"Erro espec\u00edfico do sistema\"\n  }\n}",
+                            "name": "Falha na cria\u00e7\u00e3o"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Estoque insuficiente para um ou mais produtos\"\n}",
+                            "name": "Estoque insuficiente"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Erro na valida\u00e7\u00e3o dos dados\",\n  \"errors\": {\n    \"customer_id\": [\"O cliente selecionado \u00e9 inv\u00e1lido.\"],\n    \"items.0.quantity\": [\"A quantidade deve ser maior que 0.\"],\n    \"discount_percentage\": [\"O desconto deve estar entre 0 e 100.\"]\n  }\n}",
+                            "name": "Erro de valida\u00e7\u00e3o"
+                        }
+                    ]
+                },
+                {
+                    "name": "Exibir venda",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/sales\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/sales\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID da venda."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna os detalhes completos de uma venda espec\u00edfica, incluindo todos os itens,\ninforma\u00e7\u00f5es do cliente e c\u00e1lculos detalhados."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"customer\": {\n      \"id\": 1,\n      \"name\": \"Jo\u00e3o Silva\",\n      \"email\": \"joao@exemplo.com\",\n      \"cpf\": \"123.456.789-00\",\n      \"phone\": \"(11) 99999-9999\"\n    },\n    \"status\": \"completed\",\n    \"subtotal\": \"2499.99\",\n    \"discount_percentage\": \"10.50\",\n    \"discount_amount\": \"262.50\",\n    \"total\": \"2237.49\",\n    \"items_count\": 2,\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T11:00:00.000000Z\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product\": {\n          \"id\": 1,\n          \"name\": \"Notebook Dell Inspiron\",\n          \"price\": \"2299.99\",\n          \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook.jpg\"\n        },\n        \"quantity\": 1,\n        \"unit_price\": \"2299.99\",\n        \"subtotal\": \"2299.99\"\n      },\n      {\n        \"id\": 2,\n        \"product\": {\n          \"id\": 2,\n          \"name\": \"Mouse Logitech\",\n          \"price\": \"200.00\",\n          \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/mouse.jpg\"\n        },\n        \"quantity\": 1,\n        \"unit_price\": \"200.00\",\n        \"subtotal\": \"200.00\"\n      }\n    ]\n  }\n}",
+                            "name": "Venda encontrada"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Venda n\u00e3o encontrada\"\n}",
+                            "name": "Venda n\u00e3o encontrada"
+                        }
+                    ]
+                },
+                {
+                    "name": "Atualizar status da venda",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/sales\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/sales\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID da venda."
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"status\":\"completed\"}"
+                        },
+                        "description": "Altera o status de uma venda seguindo as regras de transi\u00e7\u00e3o de status.\nEsta \u00e9 uma opera\u00e7\u00e3o cr\u00edtica que afeta o controle de estoque.\n\n## Transi\u00e7\u00f5es de Status\n\n### PENDING \u2192 COMPLETED\n- Confirma a venda\n- Deduz estoque definitivamente\n- N\u00e3o pode ser revertido automaticamente\n\n### PENDING \u2192 CANCELLED\n- Cancela a venda\n- Libera estoque reservado\n- Opera\u00e7\u00e3o definitiva\n\n### COMPLETED \u2192 CANCELLED\n- Cancela venda j\u00e1 finalizada\n- Restaura estoque deduzido\n- Requer verifica\u00e7\u00e3o de estoque atual\n\n## Valida\u00e7\u00f5es de Neg\u00f3cio\n- Verifica transi\u00e7\u00e3o v\u00e1lida de status\n- Valida disponibilidade de estoque (para restaura\u00e7\u00e3o)\n- Aplica regras de auditoria"
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Status da venda atualizado com sucesso\",\n  \"data\": {\n    \"id\": 1,\n    \"customer\": {\n      \"id\": 1,\n      \"name\": \"Jo\u00e3o Silva\",\n      \"email\": \"joao@exemplo.com\",\n      \"cpf\": \"123.456.789-00\"\n    },\n    \"status\": \"completed\",\n    \"subtotal\": \"2499.99\",\n    \"discount_percentage\": \"10.50\",\n    \"discount_amount\": \"262.50\",\n    \"total\": \"2237.49\",\n    \"items_count\": 2,\n    \"created_at\": \"2026-03-06T10:30:00.000000Z\",\n    \"updated_at\": \"2026-03-06T11:00:00.000000Z\",\n    \"items\": [\n      {\n        \"id\": 1,\n        \"product\": {\n          \"id\": 1,\n          \"name\": \"Notebook Dell Inspiron\",\n          \"price\": \"2299.99\"\n        },\n        \"quantity\": 1,\n        \"unit_price\": \"2299.99\",\n        \"subtotal\": \"2299.99\"\n      }\n    ]\n  }\n}",
+                            "name": "Status atualizado - PENDING para COMPLETED"
+                        },
+                        {
+                            "header": [],
+                            "code": 400,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Transi\u00e7\u00e3o de status inv\u00e1lida\"\n}",
+                            "name": "Transi\u00e7\u00e3o de status inv\u00e1lida"
+                        },
+                        {
+                            "header": [],
+                            "code": 400,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Falha ao atualizar a venda\",\n  \"errors\": {\n    \"details\": \"Erro espec\u00edfico do sistema\"\n  }\n}",
+                            "name": "Falha na atualiza\u00e7\u00e3o"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Venda n\u00e3o encontrada\"\n}",
+                            "name": "Venda n\u00e3o encontrada"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Estoque insuficiente para completar a opera\u00e7\u00e3o\"\n}",
+                            "name": "Estoque insuficiente para cancelar"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Nenhum campo v\u00e1lido para atualiza\u00e7\u00e3o fornecido\"\n}",
+                            "name": "Campo status obrigat\u00f3rio"
+                        }
+                    ]
+                },
+                {
+                    "name": "Excluir venda",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/sales\/:id",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/sales\/:id",
+                            "variable": [
+                                {
+                                    "id": "id",
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "ID da venda."
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Remove uma venda do sistema com todas as suas valida\u00e7\u00f5es e impactos.\n\n## Processo de Exclus\u00e3o\n1. Verifica se a venda pode ser exclu\u00edda\n2. Restaura estoque se necess\u00e1rio (dependendo do status)\n3. Remove itens da venda\n4. Remove a venda\n\n## Regras de Neg\u00f3cio\n- Vendas PENDING: Remove e libera estoque reservado\n- Vendas COMPLETED: Remove e restaura estoque deduzido\n- Vendas CANCELLED: Remove sem impacto no estoque\n\n## Impacto no Estoque\n- **PENDING**: Libera estoque reservado\n- **COMPLETED**: Adiciona de volta ao estoque\n- **CANCELLED**: Sem altera\u00e7\u00e3o (j\u00e1 estava liberado)"
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Venda exclu\u00edda com sucesso\",\n  \"data\": null\n}",
+                            "name": "Venda exclu\u00edda"
+                        },
+                        {
+                            "header": [],
+                            "code": 400,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Falha ao criar a venda\",\n  \"errors\": {\n    \"details\": \"Erro espec\u00edfico do sistema\"\n  }\n}",
+                            "name": "Falha na exclus\u00e3o"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Venda n\u00e3o encontrada\"\n}",
+                            "name": "Venda n\u00e3o encontrada"
+                        }
+                    ]
+                },
+                {
+                    "name": "Listar itens de uma venda",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/sales\/:sale_id\/items",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/sales\/:sale_id\/items",
+                            "variable": [
+                                {
+                                    "id": "sale_id",
+                                    "key": "sale_id",
+                                    "value": "16",
+                                    "description": "The ID of the sale."
+                                },
+                                {
+                                    "id": "sale",
+                                    "key": "sale",
+                                    "value": "1",
+                                    "description": "ID da venda."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retorna todos os itens de uma venda espec\u00edfica com detalhes dos produtos.\n\u00datil para exibir o detalhamento completo dos produtos vendidos."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Dados recuperados com sucesso\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"product\": {\n        \"id\": 1,\n        \"name\": \"Notebook Dell Inspiron\",\n        \"description\": \"Notebook Dell com processador i7\",\n        \"price\": \"2299.99\",\n        \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/notebook.jpg\"\n      },\n      \"quantity\": 1,\n      \"unit_price\": \"2299.99\",\n      \"subtotal\": \"2299.99\"\n    },\n    {\n      \"id\": 2,\n      \"product\": {\n        \"id\": 2,\n        \"name\": \"Mouse Logitech\",\n        \"description\": \"Mouse sem fio com precis\u00e3o \u00f3ptica\",\n        \"price\": \"200.00\",\n        \"image_url\": \"http:\/\/localhost:8080\/storage\/products\/mouse.jpg\"\n      },\n      \"quantity\": 1,\n      \"unit_price\": \"200.00\",\n      \"subtotal\": \"200.00\"\n    }\n  ]\n}",
+                            "name": "Itens da venda"
+                        },
+                        {
+                            "header": [],
+                            "code": 404,
+                            "body": "{\n  \"success\": false,\n  \"message\": \"Venda n\u00e3o encontrada\"\n}",
+                            "name": "Venda n\u00e3o encontrada"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "\ud83d\udee0\ufe0f Utilit\u00e1rios",
+            "description": "\nEndpoints utilit\u00e1rios para monitoramento e verifica\u00e7\u00e3o do sistema.\nInclui health check e informa\u00e7\u00f5es de status da aplica\u00e7\u00e3o.",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "api\/health",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/api\/health"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Endpoint p\u00fablico para verifica\u00e7\u00e3o de sa\u00fade da API.\nRetorna informa\u00e7\u00f5es sobre o status da aplica\u00e7\u00e3o, timestamp e vers\u00e3o.\n\nEste endpoint \u00e9 usado para:\n- Monitoramento de uptime\n- Load balancer health checks\n- Verifica\u00e7\u00e3o de conectividade\n- Deploy validation",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\n  \"status\": \"healthy\",\n  \"timestamp\": \"2026-03-06T13:45:00.012870Z\",\n  \"version\": \"1.0.0\"\n}",
+                            "name": "API funcionando corretamente"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "Authorization",
+                "type": "string"
+            }
+        ]
+    }
+}
