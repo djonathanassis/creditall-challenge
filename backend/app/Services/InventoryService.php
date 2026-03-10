@@ -15,11 +15,6 @@ readonly class InventoryService
         private ProductRepositoryInterface $productRepository
     ) {}
 
-    public function validateStock(Product $product, int $quantity): bool
-    {
-        return $product->stock_quantity >= $quantity;
-    }
-
     /**
 
      * @param array $items
@@ -39,13 +34,7 @@ readonly class InventoryService
                 );
             }
 
-            if (!$this->validateStock($product, $item->quantity)) {
-                throw new InsufficientStockException(
-                    $product->name,
-                    $item->quantity,
-                    $product->stock_quantity
-                );
-            }
+            $this->validateInsufficientStock($product, $item->quantity);
         }
     }
 
@@ -54,14 +43,7 @@ readonly class InventoryService
      */
     public function reserveStock(Product $product, int $quantity): void
     {
-        if (! $this->validateStock($product, $quantity)) {
-            throw new InsufficientStockException(
-                $product->name,
-                $quantity,
-                $product->stock_quantity
-            );
-        }
-
+        [$product, $quantity] = $this->validateInsufficientStock($product, $quantity);
         $this->productRepository->decrementStock($product, $quantity);
     }
 
@@ -97,5 +79,26 @@ readonly class InventoryService
         foreach ($saleItems as $saleItem) {
             $this->releaseStock($saleItem->product, $saleItem->quantity);
         }
+    }
+
+    private function validateQuantity(Product $product, int $quantity): bool
+    {
+        return $product->stock_quantity >= $quantity;
+    }
+
+    /**
+     * @throws InsufficientStockException
+     */
+    private function validateInsufficientStock(Product $product, int $quantity): array
+    {
+        if (!$this->validateQuantity($product, $quantity)) {
+            throw new InsufficientStockException(
+                $product->name,
+                $quantity,
+                $product->stock_quantity
+            );
+        }
+
+        return [$product, $quantity];
     }
 }
