@@ -30,7 +30,7 @@ class CustomerTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'success',
-                'data' => ['*' => ['id', 'name', 'email', 'cpf']],
+                'data' => ['*' => ['id', 'name', 'email', 'cpf', 'phone']],
                 'meta',
             ]);
     }
@@ -49,7 +49,10 @@ class CustomerTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonFragment(['success' => true]);
 
-        $this->assertDatabaseHas('customers', ['email' => 'joao@example.com']);
+        $this->assertDatabaseHas('customers', [
+            'email' => 'joao@example.com',
+            'phone' => '11999999999',
+        ]);
     }
 
     public function testCanShowCustomer(): void
@@ -68,10 +71,16 @@ class CustomerTest extends TestCase
 
         $response = $this->putJson("/api/customers/{$customer->id}", [
             'name' => 'Nome Atualizado',
+            'phone' => '(11) 98888-7777',
         ]);
 
         $response->assertStatus(200)
             ->assertJsonFragment(['name' => 'Nome Atualizado']);
+
+        $this->assertDatabaseHas('customers', [
+            'id' => $customer->id,
+            'phone' => '11988887777',
+        ]);
     }
 
     public function testCanDeleteCustomer(): void
@@ -91,7 +100,20 @@ class CustomerTest extends TestCase
         $response = $this->postJson('/api/customers', []);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['name', 'email', 'cpf']);
+            ->assertJsonValidationErrors(['name', 'email', 'cpf', 'phone']);
+    }
+
+    public function testCustomerPhoneMustBeValid(): void
+    {
+        $response = $this->postJson('/api/customers', [
+            'name' => 'Cliente Teste',
+            'email' => 'cliente@teste.com',
+            'cpf' => '11144477735',
+            'phone' => '12345',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['phone']);
     }
 
     public function testCustomerSearch(): void

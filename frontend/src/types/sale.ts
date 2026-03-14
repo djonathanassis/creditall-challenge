@@ -59,8 +59,8 @@ export interface SalesFilters
   extends PaginationParams, SearchParams, SoftDeleteFilters {
   status?: SaleStatusType;
   customer_id?: number;
-  date_from?: string;
-  date_to?: string;
+  start_date?: string;
+  end_date?: string;
   min_total?: number;
   max_total?: number;
 }

@@ -34,10 +34,11 @@ class CustomerServiceTest extends TestCase
         $dto = new CreateCustomerDTO(
             name: 'John Doe',
             email: 'john@example.com',
-            cpf: '12345678901'
+            cpf: '12345678901',
+            phone: '11999999999'
         );
 
-        $customer = new Customer(['id' => 1, 'name' => 'John Doe', 'email' => 'john@example.com']);
+        $customer = new Customer(['id' => 1, 'name' => 'John Doe', 'email' => 'john@example.com', 'phone' => '11999999999']);
 
         $this->customerRepository
             ->allows('create')

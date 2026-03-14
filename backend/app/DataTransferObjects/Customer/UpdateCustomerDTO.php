@@ -12,6 +12,7 @@ final class UpdateCustomerDTO extends BaseDTO
         public readonly ?string $name = null,
         public readonly ?string $email = null,
         public readonly ?string $cpf = null,
+        public readonly ?string $phone = null,
     ) {}
 
     /**
@@ -24,6 +25,7 @@ final class UpdateCustomerDTO extends BaseDTO
             name: $data['name'] ?? null,
             email: $data['email'] ?? null,
             cpf: isset($data['cpf']) ? self::cleanCpf($data['cpf']) : null,
+            phone: isset($data['phone']) ? self::cleanPhone($data['phone']) : null,
         );
     }
 
@@ -46,6 +48,10 @@ final class UpdateCustomerDTO extends BaseDTO
             $array['cpf'] = $this->cpf;
         }
 
+        if ($this->phone !== null) {
+            $array['phone'] = $this->phone;
+        }
+
         return $array;
     }
 
@@ -57,5 +63,10 @@ final class UpdateCustomerDTO extends BaseDTO
     public static function cleanCpf(string $cpf): string
     {
         return preg_replace('/\D/', '', $cpf);
+    }
+
+    public static function cleanPhone(string $phone): string
+    {
+        return preg_replace('/\D/', '', $phone);
     }
 }

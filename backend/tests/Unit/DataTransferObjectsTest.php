@@ -90,6 +90,7 @@ class DataTransferObjectsTest extends TestCase
             'name' => 'João Silva',
             'email' => 'joao@exemplo.com',
             'cpf' => '123.456.789-01',
+            'phone' => '(11) 98888-7777',
         ];
 
         $dto = CreateCustomerDTO::fromArray($data);
@@ -97,6 +98,7 @@ class DataTransferObjectsTest extends TestCase
         $this->assertEquals('João Silva', $dto->name);
         $this->assertEquals('joao@exemplo.com', $dto->email);
         $this->assertEquals('12345678901', $dto->cpf);
+        $this->assertEquals('11988887777', $dto->phone);
     }
 
     public function testCreateCustomerDtoCpfCleaning(): void
@@ -118,6 +120,7 @@ class DataTransferObjectsTest extends TestCase
     {
         $data = [
             'email' => 'novoemail@exemplo.com',
+            'phone' => '(11) 97777-6666',
         ];
 
         $dto = UpdateCustomerDTO::fromArray($data);
@@ -125,7 +128,22 @@ class DataTransferObjectsTest extends TestCase
         $this->assertNull($dto->name);
         $this->assertEquals('novoemail@exemplo.com', $dto->email);
         $this->assertNull($dto->cpf);
+        $this->assertEquals('11977776666', $dto->phone);
         $this->assertTrue($dto->hasUpdates());
+    }
+
+    public function testCreateCustomerDtoPhoneCleaning(): void
+    {
+        $testCases = [
+            '(11) 99999-9999' => '11999999999',
+            '1133334444' => '1133334444',
+            '+55 (11) 98888-7777' => '5511988887777',
+        ];
+
+        foreach ($testCases as $input => $expected) {
+            $cleaned = CreateCustomerDTO::cleanPhone($input);
+            $this->assertEquals($expected, $cleaned, "Failed for input: {$input}");
+        }
     }
 
     public function testDtoJsonSerialization(): void

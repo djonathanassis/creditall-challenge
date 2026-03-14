@@ -433,8 +433,6 @@ class SaleController extends Controller
             return $this->errorResponse($e->getMessage());
 
         } catch (\Throwable $e) {
-
-            dd($e);
             return $this->serverErrorResponse('api.errors.server_error');
         }
     }

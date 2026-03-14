@@ -269,13 +269,6 @@ export default function SalesPage() {
                       </td>
                       <td className='table-cell'>
                         <div className='flex items-center space-x-2'>
-                          <Link
-                            to={`/sales/${sale.id}`}
-                            className='text-primary-600 hover:text-primary-900 text-sm font-medium'
-                          >
-                            Ver
-                          </Link>
-
                           {/* Status change buttons - only for non-deleted sales */}
                           {!sale.is_deleted && (
                             <>

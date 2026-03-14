@@ -25,7 +25,7 @@ function Navigation() {
   }, [logout, navigate]);
 
   const toggleMenu = useCallback(() => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   }, []);
 
   return (

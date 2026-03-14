@@ -25,13 +25,9 @@ const SalesPage = lazy(() => import('./pages/SalesPage'));
 const SalesFormPage = lazy(() => import('./pages/SalesFormPage'));
 
 // Componente wrapper para Suspense com loading
-const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({ 
-  children 
-}) => (
-  <Suspense fallback={<Loading />}>
-    {children}
-  </Suspense>
-);
+const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => <Suspense fallback={<Loading />}>{children}</Suspense>;
 
 function App() {
   return (
@@ -39,11 +35,14 @@ function App() {
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route path='/login' element={
-            <SuspenseWrapper>
-              <LoginPage />
-            </SuspenseWrapper>
-          } />
+          <Route
+            path='/login'
+            element={
+              <SuspenseWrapper>
+                <LoginPage />
+              </SuspenseWrapper>
+            }
+          />
 
           {/* Protected Routes */}
           <Route

@@ -25,6 +25,7 @@ class CustomerFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'cpf' => $this->generateValidCpf(),
+            'phone' => $this->generatePhone(),
         ];
     }
 
@@ -59,6 +60,15 @@ class CustomerFactory extends Factory
 
         // Format CPF
         return substr($cpf, 0, 3) . '.' . substr($cpf, 3, 3) . '.' . substr($cpf, 6, 3) . '-' . substr($cpf, 9, 2);
+    }
+
+    private function generatePhone(): string
+    {
+        $ddd = $this->faker->numberBetween(11, 99);
+        $prefix = $this->faker->boolean() ? '9' . $this->faker->numerify('####') : $this->faker->numerify('####');
+        $suffix = $this->faker->numerify('####');
+
+        return (string) $ddd . $prefix . $suffix;
     }
 
     /**

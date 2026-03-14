@@ -29,7 +29,6 @@ final class ProductPriceService implements ProductPriceServiceInterface
         $uniqueIds = array_unique($productIds);
         $missingIds = array_diff($uniqueIds, array_keys($this->priceCache));
 
-        // Only query database for missing prices
         if (! empty($missingIds)) {
             $prices = Product::whereIn('id', $missingIds)
                 ->pluck('price', 'id')
@@ -40,7 +39,6 @@ final class ProductPriceService implements ProductPriceServiceInterface
                 throw new SaleException('Produtos não encontrados: '.implode(', ', $notFoundIds));
             }
 
-            // Use + operator to preserve numeric string keys (array_merge re-indexes them)
             $this->priceCache = $this->priceCache + $prices;
         }
 

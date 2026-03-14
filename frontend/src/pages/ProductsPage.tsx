@@ -287,12 +287,6 @@ export default function ProductsPage() {
                         </td>
                         <td className='table-cell'>
                           <div className='flex items-center space-x-3'>
-                            <Link
-                              to={`/products/${product.id}`}
-                              className='text-primary-600 hover:text-primary-900 text-sm font-medium'
-                            >
-                              Ver
-                            </Link>
                             {!product.is_deleted && (
                               <>
                                 <Link

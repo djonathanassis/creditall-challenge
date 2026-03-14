@@ -226,12 +226,6 @@ export default function CustomersPage() {
                       </td>
                       <td className='table-cell'>
                         <div className='flex items-center space-x-3'>
-                          <Link
-                            to={`/customers/${customer.id}`}
-                            className='text-primary-600 hover:text-primary-900 text-sm font-medium'
-                          >
-                            Ver
-                          </Link>
                           {!customer.is_deleted && (
                             <>
                               <Link

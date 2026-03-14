@@ -26,15 +26,15 @@ export class SalesService {
     try {
       const processedFilters = { ...filters };
 
-      if (processedFilters.date_from) {
-        processedFilters.date_from = this.formatDateForApi(
-          processedFilters.date_from
+      if (processedFilters.start_date) {
+        processedFilters.start_date = this.formatDateForApi(
+          processedFilters.start_date
         );
       }
 
-      if (processedFilters.date_to) {
-        processedFilters.date_to = this.formatDateForApi(
-          processedFilters.date_to
+      if (processedFilters.end_date) {
+        processedFilters.end_date = this.formatDateForApi(
+          processedFilters.end_date
         );
       }
 
@@ -193,12 +193,12 @@ export class SalesService {
   static async getByDateRange(
     dateFrom: string,
     dateTo: string,
-    filters: Omit<SalesFilters, 'date_from' | 'date_to'> = {}
+    filters: Omit<SalesFilters, 'start_date' | 'end_date'> = {}
   ): Promise<PaginatedResponse<Sale>> {
     return this.getAll({
       ...filters,
-      date_from: dateFrom,
-      date_to: dateTo,
+      start_date: dateFrom,
+      end_date: dateTo,
     });
   }
 

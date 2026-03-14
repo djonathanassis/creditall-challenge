@@ -12,6 +12,7 @@ final class CreateCustomerDTO extends BaseDTO
         public readonly string $name,
         public readonly string $email,
         public readonly string $cpf,
+        public readonly string $phone,
     ) {}
 
     /**
@@ -24,11 +25,17 @@ final class CreateCustomerDTO extends BaseDTO
             name: $data['name'],
             email: $data['email'],
             cpf: self::cleanCpf($data['cpf']),
+            phone: self::cleanPhone($data['phone']),
         );
     }
 
     public static function cleanCpf(string $cpf): string
     {
         return preg_replace('/\D/', '', $cpf);
+    }
+
+    public static function cleanPhone(string $phone): string
+    {
+        return preg_replace('/\D/', '', $phone);
     }
 }

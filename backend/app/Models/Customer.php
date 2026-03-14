@@ -17,12 +17,14 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string $email
  * @property string $cpf
+ * @property string $phone
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Carbon|null $deleted_at
  * @property-read float $total_purchases
  * @property-read int $total_orders
  * @property-read string $formatted_cpf
+ * @property-read string $formatted_phone
  * @property-read string $masked_cpf
  * @property-read Collection<int, Sale> $sales
  */
@@ -37,6 +39,7 @@ class Customer extends Model
         'name',
         'email',
         'cpf',
+        'phone',
     ];
 
     /**
@@ -78,6 +81,21 @@ class Customer extends Model
         $cpf = $this->formatted_cpf;
 
         return substr($cpf, 0, 3) . '.***.**' . substr($cpf, -2);
+    }
+
+    public function getFormattedPhoneAttribute(): string
+    {
+        $phone = preg_replace('/\D/', '', $this->phone);
+
+        if (strlen($phone) === 11) {
+            return preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $phone);
+        }
+
+        if (strlen($phone) === 10) {
+            return preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $phone);
+        }
+
+        return $this->phone;
     }
 
     public function scopeSearch($query, string $search): Builder

@@ -24,15 +24,24 @@ class StoreCustomerRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:customers,email'],
             'cpf' => ['required', 'string', 'size:11', 'unique:customers,cpf', new ValidCpf()],
+            'phone' => ['required', 'string', 'regex:/^\d{10,11}$/'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
+        $dataToMerge = [];
+
         if ($this->has('cpf')) {
-            $this->merge([
-                'cpf' => preg_replace('/\D/', '', $this->cpf),
-            ]);
+            $dataToMerge['cpf'] = preg_replace('/\D/', '', $this->cpf);
+        }
+
+        if ($this->has('phone')) {
+            $dataToMerge['phone'] = preg_replace('/\D/', '', $this->phone);
+        }
+
+        if (! empty($dataToMerge)) {
+            $this->merge($dataToMerge);
         }
     }
 }
